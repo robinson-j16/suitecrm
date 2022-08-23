@@ -1,0 +1,50 @@
+version: '3'
+services:
+  sugarweb:
+    build: .
+    volumes:
+      - sugar-codebase:/var/www/html
+      - ./server/php.ini:/usr/local/etc/php/php.ini
+    ports:
+      - "80:80"
+    networks:
+      - sugar-network
+
+  sugardb:
+    image: mysql:5
+    platform: linux/amd64
+    command: --max_allowed_packet=32505856
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: 'password'
+      MYSQL_ROOT_HOST: '%'
+    networks:
+      - sugar-network
+    volumes:
+      - sugardbdata:/var/lib/mysql
+
+  mailhog:
+    container_name: mail
+    image: mailhog/mailhog
+    ports:
+      - "8025:8025"
+    networks:
+      - sugar-network
+
+  memcached:
+    container_name: memcached
+    image: memcached:latest
+    ports:
+      - "11211:11211"
+    networks:
+      - sugar-network
+
+networks:
+  sugar-network:
+    driver: bridge
+
+volumes:
+  sugardbdata:
+    driver: local
+  sugar-codebase:
