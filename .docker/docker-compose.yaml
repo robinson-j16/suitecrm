@@ -1,9 +1,8 @@
 version: '3'
 services:
   sugarweb:
-    build: .
+    build: ./
     volumes:
-      - sugar-codebase:/var/www/html
       - ./server/php.ini:/usr/local/etc/php/php.ini
     ports:
       - "80:80"
@@ -47,4 +46,3 @@ networks:
 volumes:
   sugardbdata:
     driver: local
-  sugar-codebase:
