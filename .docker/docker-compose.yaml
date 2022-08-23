@@ -3,7 +3,7 @@ services:
   sugarweb:
     build: ./
     volumes:
-      - ./server/php.ini:/usr/local/etc/php/php.ini
+      - ./dockerfiles/server/php.ini:/usr/local/etc/php/php.ini
     ports:
       - "80:80"
     networks:

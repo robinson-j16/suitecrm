@@ -27,8 +27,8 @@ RUN echo "extension=memcached.so" > /usr/local/etc/php/conf.d/20-memcached.ini
 
 RUN a2enmod rewrite && a2enmod headers
 
-ADD ./server/001-sugarlocal.conf /etc/apache2/sites-available/001-sugarlocal.conf
-ADD ./server/50-suitecrm.ini /usr/local/etc/php/conf.d/50-suitecrm.ini
+ADD ./dockerfiles/server/001-sugarlocal.conf /etc/apache2/sites-available/001-sugarlocal.conf
+ADD ./dockerfiles/server/50-suitecrm.ini /usr/local/etc/php/conf.d/50-suitecrm.ini
 
 RUN a2ensite 001-sugarlocal.conf
 
