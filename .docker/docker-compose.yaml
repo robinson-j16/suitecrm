@@ -1,7 +1,7 @@
 version: '3'
 services:
   sugarweb:
-    build: ./
+    build: dockerfiles
     volumes:
       - ./dockerfiles/server/php.ini:/usr/local/etc/php/php.ini
     ports:
