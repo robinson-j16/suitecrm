@@ -38,9 +38,12 @@ class ProjectController extends SugarController
         $this->view = 'GanttChart';
     }
 
+    /**
+     * @throws Exception
+     */
     public function action_generate_chart()
     {
-        global $current_user;
+        global $current_user, $current_language;
         if (!$current_user->hasActionAccess($this->module, $this->action)) {
             SugarApplication::appendErrorMessage(translate('LBL_NO_ACCESS', 'ACL'));
             SugarApplication::redirect('index.php');
@@ -48,6 +51,7 @@ class ProjectController extends SugarController
         }
 
         $db = DBManagerFactory::getInstance();
+        $mod_strings = return_module_language($current_language, 'Project');
 
         include_once('modules/Project/gantt.php');
         include_once('modules/Project/project_table.php');
@@ -58,6 +62,10 @@ class ProjectController extends SugarController
         //Get project tasks
         $Task = BeanFactory::getBean('ProjectTask');
         $tasks = $Task->get_full_list("order_number", "project_task.project_id = '".$project->id."'");
+
+        if (empty($tasks)) {
+            return throw new Exception($mod_strings['LBL_TASKS_NOT_FOUND']);
+        }
 
         //Get the start and end date of the project in database format
         $query = "SELECT min(date_start) FROM project_task WHERE project_id = '{$project->id}'";
@@ -496,7 +504,7 @@ class ProjectController extends SugarController
             $taskarr = array();
             $t = 0;
             $skipped = 0;
-            if (!is_null($tasks)) {
+            if (!empty($tasks)) {
                 foreach ($tasks as $task) {
                     if ($this->count_days($start, $task->date_start) == -1 && $this->count_days($start, $task->date_finish) == -1) {
                         $skipped++;

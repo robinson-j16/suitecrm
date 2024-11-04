@@ -108,7 +108,7 @@ function getUserSignature(
         return '';
     }
 
-    $emailSignatures = $owner->getPreference('account_signatures', 'Emails');
+    $emailSignatures = $owner->getPreference('account_signatures', 'Emails') ?? '';
     $emailSignatures = sugar_unserialize(base64_decode($emailSignatures));
 
     $signatureId = $emailSignatures[$inboundEmailId] ?? '';
