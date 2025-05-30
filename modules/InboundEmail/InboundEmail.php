@@ -3243,7 +3243,7 @@ class InboundEmail extends SugarBean
             $useSsl = true;
         }
 
-        $exServ = explode('::', $this->service);
+        $exServ = explode('::', (string) $this->service);
         if (!isset($exServ[1])) {
             LoggerManager::getLogger()->warn('incorrect service given: ' . $this->service);
             $service = '/';

@@ -204,7 +204,7 @@ class AOR_Report extends Basic
         while ($row = $this->db->fetchByAssoc($result)) {
             $field = BeanFactory::newBean('AOR_Fields');
             $field->retrieve($row['id']);
-            
+
             $path = unserialize(base64_decode($field->module_path),['allowed_classes' => false]);
 
             $field_bean = new $beanList[$this->report_module]();
@@ -1628,7 +1628,11 @@ class AOR_Report extends Basic
                             break;
 
                         case 'Date':
-                            $params = unserialize(base64_decode($condition->value),['allowed_classes' => false]);
+                            if (is_string($condition->value)) {
+                                $params = unserialize(base64_decode($condition->value),['allowed_classes' => false]);
+                            } else {
+                                $params = $condition->value;
+                            }
 
                             // Fix for issue #1272 - AOR_Report module cannot update Date type parameter.
                             if ($params == false) {
