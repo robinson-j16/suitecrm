@@ -250,8 +250,18 @@ class SugarView
         if ($this->_getOption('json_output')) {
             $content = ob_get_clean();
             $module = $this->module;
+
+            $processed_content = $content;
+            if (mb_detect_encoding($content) !== "UTF-8") {
+                global $sugar_config;
+                $target_charset = $sugar_config['default_charset'] ?? 'UTF-8';
+                $detected = mb_detect_encoding($content, [$target_charset, 'ISO-8859-1', 'Windows-1252'], true);
+                $source_charset = $detected ?: $target_charset;
+                $processed_content = mb_convert_encoding($content, 'UTF-8', $source_charset);
+            }
+            
             $ajax_ret = array(
-                'content' => mb_detect_encoding($content) == "UTF-8" ? $content : mb_convert_encoding($content, 'ISO-8859-1', 'UTF-8'),
+                'content' => $processed_content,
                 'menu' => array(
                     'module' => $module,
                     'label' => translate($module),
