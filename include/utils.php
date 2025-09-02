@@ -1626,9 +1626,18 @@ function is_guid($guid)
 }
 
 /**
- * A temporary method of generating GUIDs of the correct format for our DB.
+ * Generates a UUID v4 (random) in the format required by SuiteCRM database.
  *
- * @return string contianing a GUID in the format: aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee
+ * Uses symfony/polyfill-uuid to generate RFC 4122 compliant UUIDs.
+ * This replaces the legacy microtime-based implementation to fix PHP 8.4
+ * compatibility issues where record IDs were incorrectly starting with "00000".
+ *
+ * @return string UUID v4 in the format: aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee
+ *
+ * @throws RuntimeException if UUID generation fails
+ *
+ * @since SuiteCRM 7.15 Updated to use symfony/polyfill-uuid for PHP 8.4 compatibility
+ * @see https://tools.ietf.org/html/rfc4122 RFC 4122 UUID specification
  *
  * Portions created by SugarCRM are Copyright (C) SugarCRM, Inc.
  * All Rights Reserved.
@@ -1636,49 +1645,7 @@ function is_guid($guid)
  */
 function create_guid()
 {
-    $microTime = microtime();
-    list($a_dec, $a_sec) = explode(' ', $microTime);
-
-    $dec_hex = dechex((int) $a_dec * 1000000);
-    $sec_hex = dechex((int) $a_sec);
-
-    ensure_length($dec_hex, 5);
-    ensure_length($sec_hex, 6);
-
-    $guid = '';
-    $guid .= $dec_hex;
-    $guid .= create_guid_section(3);
-    $guid .= '-';
-    $guid .= create_guid_section(4);
-    $guid .= '-';
-    $guid .= create_guid_section(4);
-    $guid .= '-';
-    $guid .= create_guid_section(4);
-    $guid .= '-';
-    $guid .= $sec_hex;
-    $guid .= create_guid_section(6);
-
-    return $guid;
-}
-
-function create_guid_section($characters)
-{
-    $return = '';
-    for ($i = 0; $i < $characters; ++$i) {
-        $return .= dechex(mt_rand(0, 15));
-    }
-
-    return $return;
-}
-
-function ensure_length(&$string, $length)
-{
-    $strlen = strlen((string) $string);
-    if ($strlen < $length) {
-        $string = str_pad($string, $length, '0');
-    } elseif ($strlen > $length) {
-        $string = substr((string) $string, 0, $length);
-    }
+    return uuid_create();
 }
 
 function microtime_diff($a, $b)
