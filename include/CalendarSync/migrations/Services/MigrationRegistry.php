@@ -43,6 +43,7 @@ class MigrationRegistry
 
     public const MIGRATION_CATEGORY = 'migrations';
     public const GOOGLE_CALENDAR_SYNC_MIGRATION = 'google_calendar_sync_migration';
+    public const CALENDAR_SYNC_HOOKS_INSTALLATION = 'calendar_sync_hooks_installation';
 
     protected DBManager $db;
     protected LoggerManager $logger;
@@ -73,14 +74,23 @@ class MigrationRegistry
      */
     public function hasMigrationRun(string $migrationId): bool
     {
-        $query = "SELECT COUNT(*) as the_count FROM config
-                  WHERE category = " . $this->db->quoted(self::MIGRATION_CATEGORY) . "
-                  AND name = " . $this->db->quoted($migrationId);
+        try {
+            $query = "SELECT COUNT(*) as the_count FROM config
+                      WHERE category = " . $this->db->quoted(self::MIGRATION_CATEGORY) . "
+                      AND name = " . $this->db->quoted($migrationId);
 
-        $result = $this->db->query($query);
-        $row = $this->db->fetchByAssoc($result);
+            $result = $this->db->query($query);
+            if ($result === false) {
+                $this->logger->warn("[MigrationRegistry][hasMigrationRun] Query failed for $migrationId, assuming not run");
+                return false;
+            }
 
-        return !empty($row['the_count']);
+            $row = $this->db->fetchByAssoc($result);
+            return !empty($row['the_count']);
+        } catch (Throwable $e) {
+            $this->logger->warn("[MigrationRegistry][hasMigrationRun] Exception checking migration $migrationId: " . $e->getMessage());
+            return false;
+        }
     }
 
     /**
