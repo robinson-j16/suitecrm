@@ -272,13 +272,18 @@
                 <td scope="row" valign="top">
                     <slot>{$MOD.LBL_USE_REAL_NAMES}:</slot>&nbsp;{sugar_help text=$MOD.LBL_USE_REAL_NAMES_DESC }</td>
                 <td>
-                    <slot><input tabindex='12' type="checkbox" name="use_real_names" {$USE_REAL_NAMES}></slot>
+                    <slot>
+                        <input type="hidden" name="use_real_names" value="false">
+                        <input tabindex='12' type="checkbox" name="use_real_names" {$USE_REAL_NAMES}>
+                    </slot>
                 </td>
                 <td scope="row" valign="top">
                     <slot>{$MOD.LBL_MAILMERGE}:</slot>&nbsp;{sugar_help text=$MOD.LBL_MAILMERGE_TEXT }
                 </td>
                 <td valign="top" nowrap>
-                    <slot><input tabindex='12' name='mailmerge_on' class="checkbox" type="checkbox" {$MAILMERGE_ON}>
+                    <slot>
+                        <input type="hidden" name="mailmerge_on" value="false">
+                        <input tabindex='12' name="mailmerge_on" class="checkbox" type="checkbox" {$MAILMERGE_ON}>
                     </slot>
                 </td>
             </tr>

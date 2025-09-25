@@ -776,7 +776,7 @@ class User extends Person implements EmailInterface
             }
 
             if (isset($_POST['mailmerge_on']) && !empty($_POST['mailmerge_on'])) {
-                $this->setPreference('mailmerge_on', 'on', 0, 'global');
+                $this->setPreference('mailmerge_on', isTrue($_POST['mailmerge_on']) ? 'on' : 'off', 0, 'global');
             } else {
                 $mailMerge = $this->getCurrentPreference('mailmerge_on');
                 $this->setPreference('mailmerge_on', $mailMerge ?? 'off', 0, 'global');
@@ -953,7 +953,7 @@ class User extends Person implements EmailInterface
                 $this->setPreference('default_export_charset', $_POST['default_export_charset'], 0, 'global');
             }
             if (isset($_POST['use_real_names'])) {
-                $this->setPreference('use_real_names', 'on', 0, 'global');
+                $this->setPreference('use_real_names', isTrue($_POST['use_real_names']) ? 'on' : 'off', 0, 'global');
             } elseif (!isset($_POST['use_real_names']) && !isset($_POST['from_dcmenu'])) {
                 // Make sure we're on the full form and not the QuickCreate.
                 $useRealNames = $this->getCurrentPreference('use_real_names');
