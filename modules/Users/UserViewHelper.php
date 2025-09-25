@@ -527,8 +527,9 @@ class UserViewHelper
      */
     protected function setGoogleAuthAccessToken()
     {
-        $accessToken = json_decode(base64_decode($this->bean->getPreference('GoogleApiToken', 'GoogleSync')));
-        if (!empty($this->bean->getPreference('GoogleApiToken', 'GoogleSync')) && $accessToken = json_decode(base64_decode($this->bean->getPreference('GoogleApiToken', 'GoogleSync')))) { // Check if the user has a token
+        $GoogleSyncGoogleApiToken = $this->bean->getPreference('GoogleApiToken', 'GoogleSync') ?? '';
+        $accessToken = json_decode(base64_decode($GoogleSyncGoogleApiToken));
+        if (!empty($GoogleSyncGoogleApiToken) && $accessToken) { // Check if the user has a token
             $this->ss->assign("GOOGLE_API_TOKEN", "CONFIGURED");
             $this->ss->assign("GOOGLE_API_TOKEN_COLOR", "green");
             $this->ss->assign("GOOGLE_API_TOKEN_BTN", "Reauthorize");
