@@ -126,6 +126,9 @@ class Sugar_Smarty extends Smarty
     public function registerPHPFunctions(array $functions): void
     {
         foreach ($functions as $function) {
+            if ($this->registered_plugins[Smarty::PLUGIN_MODIFIER][$function] ?? false) {
+                continue;
+            }
             try {
                 $this->registerPlugin(Smarty::PLUGIN_MODIFIER, $function, $function);
             } catch (SmartyException $e) {
