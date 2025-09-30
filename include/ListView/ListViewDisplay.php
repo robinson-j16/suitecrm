@@ -741,7 +741,7 @@ EOF;
                     $seedName2 = strtoupper($columnName);
                     $htmlDisplay = html_entity_decode($cField->bean->$seedName);
                     $count = 0;
-                    while ($count < count($data['data'])) {
+                    while ($count < count($data['data'] ?? [])) {
                         $data['data'][$count][$seedName2] = &$htmlDisplay;
                         $count++;
                     }
