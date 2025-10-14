@@ -106,7 +106,6 @@ function pollMonitoredInboxes()
     global $dictionary;
     global $app_strings;
 
-
     require_once('modules/Emails/EmailUI.php');
 
     $ie = BeanFactory::newBean('InboundEmail');
@@ -301,6 +300,12 @@ function pruneDatabase()
     $GLOBALS['log']->info('----->Scheduler fired job of type pruneDatabase()');
     $backupDir = sugar_cached('backups');
     $backupFile = 'backup-pruneDatabase-GMT0_' . gmdate('Y_m_d-H_i_s', strtotime('now')) . '.php';
+
+    require_once 'modules/OAuth2Tokens/service/OAuthTokenMarkDeletedService.php';
+    (new OAuthTokenMarkDeletedService())->run();
+
+    require_once 'modules/OAuth2AuthCodes/services/OAuthCodeMarkDeletedService.php';
+    (new OAuthCodeMarkDeletedService())->run();
 
     $db = DBManagerFactory::getInstance();
     $tables = $db->getTablesArray();
