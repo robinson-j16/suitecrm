@@ -903,8 +903,8 @@ class Imap2Handler implements ImapHandlerInterface
         };
 
         $ret = $this->executeImapCmd($call, $charset);
-
-        if (!$ret) {
+        $err = imap2_last_error();
+        if (!$ret && !empty($err)) {
             $this->log('IMAP search error');
         }
         $this->logReturn(__FUNCTION__, $ret);
