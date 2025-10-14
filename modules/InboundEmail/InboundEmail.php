@@ -6244,6 +6244,22 @@ class InboundEmail extends SugarBean
         $this->stored_options = base64_encode(serialize($options));
     }
 
+    /**
+     * @param $option_name
+     * @param $value
+     * @return void
+     */
+    public function setStoredOption($option_name, $value): void
+    {
+        $options = $this->getStoredOptions();
+
+        if (!is_array($options) || empty($options)) {
+            $options = [];
+        }
+        $options[$option_name] = $value;
+
+        $this->setStoredOptions($options);
+    }
 
     /**
      * @param $option_name
@@ -6342,6 +6358,35 @@ class InboundEmail extends SugarBean
 
         $nmessages = is_countable($ret)? count($ret) : 0;
         LoggerManager::getLogger()->debug('-----> getNewMessageIds() got ' . $nmessages . ' new Messages');
+
+        return $ret;
+    }
+
+    /**
+     * finds emails tagged "//UNSEEN" on mailserver and "SINCE: [date]" if that
+     * option is set
+     *
+     * @return array Array of messageNumbers (mail server's internal keys)
+     */
+    public function getMessagesFromDate(string $date, bool $unSeenOnly = false): array
+    {
+        $startFormatedDate = date('d-M-Y', strtotime($date));
+
+        $criteria = 'ON "' . $startFormatedDate . '" UNDELETED';
+        if ($unSeenOnly) {
+            $criteria .= ' UNSEEN';
+        }
+        $ret = $this->getImap()->search($criteria);
+        $check = $this->getImap()->check();
+
+        if (isFalse($ret) && !empty($this->getImap()->getErrors())) {
+            $GLOBALS['log']->error("InboundEmail::getMessagesFromDate: IMAP search failed: criteria -'$criteria' | error: " . $this->getImap()->getErrors());
+            $ret = [];
+        }
+
+        if (empty($ret)) {
+            $ret = [];
+        }
 
         return $ret;
     }
