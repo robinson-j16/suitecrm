@@ -104,6 +104,32 @@ $dictionary['InboundEmail'] = [
             'unified_search' => false,
             'comment' => 'Date record last modified'
         ],
+        'last_import_run_datetime' => [
+            'name' => 'last_import_run_datetime',
+            'vname' => 'LBL_LAST_IMPORT_RUN_DATETIME',
+            'type' => 'datetime',
+            'required' => true,
+            'reportable' => false,
+            'massupdate' => false,
+            'inline_edit' => false,
+            'importable' => false,
+            'exportable' => false,
+            'unified_search' => false,
+            'comment' => 'Last import date/time'
+        ],
+        'mailbox_last_imported_days' => [
+            'name' => 'mailbox_last_imported_days',
+            'vname' => 'LBL_MAILBOX_LAST_IMPORTED_DAYS',
+            'type' => 'text',
+            'required' => true,
+            'reportable' => false,
+            'massupdate' => false,
+            'inline_edit' => false,
+            'importable' => false,
+            'exportable' => false,
+            'unified_search' => false,
+            'comment' => 'Last imported day per mailbox'
+        ],
         'modified_user_id' => [
             'name' => 'modified_user_id',
             'rname' => 'user_name',

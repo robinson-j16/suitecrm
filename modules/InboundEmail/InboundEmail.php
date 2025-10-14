@@ -303,6 +303,10 @@ class InboundEmail extends SugarBean
      */
     public $move_messages_to_trash_after_import;
 
+    public ?string $last_import_run_datetime;
+
+    public ?string $mailbox_last_imported_days;
+
 
     /**
      * Email constructor
