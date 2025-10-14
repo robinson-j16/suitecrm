@@ -285,7 +285,9 @@ function make_sugar_config(&$sugar_config)
             '110', '143', '993', '995'
         ],
         'web_to_lead_allowed_redirect_hosts' => [],
-        'trusted_hosts' => []
+        'trusted_hosts' => [],
+        'oauth_token_delete_threshold' => '-7 days',
+        'oauth_code_delete_threshold' => '-7 days'
     );
 }
 
@@ -581,7 +583,9 @@ function get_sugar_config_defaults(): array
             '110', '143', '993', '995'
         ],
         'web_to_lead_allowed_redirect_hosts' => [],
-        'trusted_hosts' => []
+        'trusted_hosts' => [],
+        'oauth_token_delete_threshold' => '-7 days',
+        'oauth_code_delete_threshold' => '-7 days'
     ];
 
     if (!is_object($locale)) {
