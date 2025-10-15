@@ -81,15 +81,20 @@ class LuceneSearchEngine extends SearchEngine
      */
     public function search(SearchQuery $query): SearchResults
     {
+        $totalHits = 0;
         $queryString = $query->getSearchString();
-
+        $modules = $query->getModules();
         $start = microtime(true);
         $hits = $this->runLucene($queryString);
-        $results = $this->parseHits($hits);
+        $results = $this->parseHits($hits, $modules, $query->getFrom(), $query->getSize());
         $end = microtime(true);
         $elapsed = $end - $start;
 
-        return new SearchResults($results['modules'], true, $elapsed, is_countable($results['hits']) ? count($results['hits']) : 0);
+        foreach ($results as $moduleHit) {
+            $totalHits += $moduleHit['totalHits'] ?: 0;
+        }
+
+        return new SearchResults($results, true, $elapsed, $totalHits);
     }
 
     /**
@@ -103,7 +108,7 @@ class LuceneSearchEngine extends SearchEngine
         if (is_file($cachePath)) {
             $mTime = filemtime($cachePath);
             if ($mTime > (time() - 5 * 60)) {
-                $hits = unserialize(sugar_file_get_contents($cachePath), ['allowed_classes' => false]);
+                $hits = unserialize(sugar_file_get_contents($cachePath), ['allowed_classes' => true]);
             }
         }
 
@@ -151,19 +156,24 @@ class LuceneSearchEngine extends SearchEngine
      * @param mixed $hits
      * @return array
      */
-    private function parseHits(array $hits): array
+    private function parseHits(array $hits, array $modules, int $from, int $size): array
     {
         $searchResults = [];
-
         foreach ($hits as $hit) {
+            if(!in_array($hit->record_module, $modules, true)){
+                continue;
+            }
             $recordModule = $hit->record_module;
-            $searchResults[$recordModule][] = $hit->record_id;
+            $searchResults[$recordModule]['results'][] = $hit->record_id;
+        }
+        
+        foreach($searchResults as $key => $results)
+        {
+            $searchResults[$key]['results'] = array_slice($results['results'], $from, $size);
+            $searchResults[$key]['totalHits'] = is_countable($results['results']) ? count($results['results']) : 0;
         }
 
-        return [
-            'hits' => $hits,
-            'modules' => $searchResults
-        ];
+        return $searchResults;
     }
 
     /**
