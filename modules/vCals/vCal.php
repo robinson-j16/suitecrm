@@ -344,19 +344,25 @@
         /**
          * get ics file content for meeting invite email
          */
-        public static function get_ical_event(SugarBean $bean, User $user)
+        public static function get_ical_event(SugarBean $bean, User $user, $notify_user = null)
         {
             global $timedate;
             $ical_array = array();
 
             $ical_array[] = array("BEGIN", "VCALENDAR");
             $ical_array[] = array("VERSION", "2.0");
+            $ical_array[] = array("METHOD", "REQUEST");
             $ical_array[] = array("PRODID", "-//SuiteCRM//SuiteCRM Calendar//EN");
             $ical_array[] = array("BEGIN", "VEVENT");
             $ical_array[] = array("UID", $bean->id);
             $ical_array[] = array("ORGANIZER;CN=" . $user->name, "mailto:" . $user->email1);
             $ical_array[] = array("DTSTART", $timedate->fromDb($bean->date_start)->format(self::UTC_FORMAT));
             $ical_array[] = array("DTEND", $timedate->fromDb($bean->date_end)->format(self::UTC_FORMAT));
+
+            if (!empty($notify_user)) {
+                $notifyUserEmail = $notify_user->email1 ?? '';
+                $ical_array[] = array("ATTENDEE;CN=" . $notifyUserEmail . ";ROLE=REQ-PARTICIPANT;RSVP=TRUE", "mailto:" . $notifyUserEmail);
+            }
 
             $ical_array[] = array(
                 "DTSTAMP",
