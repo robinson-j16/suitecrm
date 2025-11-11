@@ -49,6 +49,7 @@ use SuiteCRM\Exception\Exception;
 use SuiteCRM\Search\SearchEngine;
 use SuiteCRM\Search\SearchQuery;
 use SuiteCRM\Search\SearchResults;
+use Throwable;
 
 
 if (!defined('sugarEntry') || !sugarEntry) {
@@ -104,11 +105,24 @@ class LuceneSearchEngine extends SearchEngine
      */
     private function runLucene(string $queryString): array
     {
+        global $log;
+
         $cachePath = 'cache/modules/AOD_Index/QueryCache/' . md5($queryString);
         if (is_file($cachePath)) {
             $mTime = filemtime($cachePath);
             if ($mTime > (time() - 5 * 60)) {
-                $hits = unserialize(sugar_file_get_contents($cachePath), ['allowed_classes' => true]);
+                try {
+                    $cacheContent = sugar_file_get_contents($cachePath);
+                    $hits = json_decode($cacheContent, false, 512, JSON_THROW_ON_ERROR);
+
+                    if (!$this->validateCacheStructure($hits)) {
+                        $log->warn('[LuceneSearchEngine][runLucene] Invalid cache structure, regenerating');
+                        unset($hits);
+                    }
+                } catch (Throwable $e) {
+                    $log->error('[LuceneSearchEngine][runLucene] Cache decode failed: ' . $e->getMessage());
+                    unset($hits);
+                }
             }
         }
 
@@ -117,6 +131,20 @@ class LuceneSearchEngine extends SearchEngine
         }
 
         return $hits;
+    }
+
+    private function validateCacheStructure($hits): bool
+    {
+        if (!is_array($hits)) {
+            return false;
+        }
+        foreach ($hits as $hit) {
+            if ($hit instanceof stdClass && property_exists($hit, 'record_module') && property_exists($hit, 'record_id')) {
+                continue;
+            }
+            return false;
+        }
+        return true;
     }
 
     /**
@@ -182,8 +210,15 @@ class LuceneSearchEngine extends SearchEngine
      */
     private function cacheQuery(string $queryString, array $resArray): void
     {
-        $file = create_cache_directory('modules/AOD_Index/QueryCache/' . md5($queryString));
-        $out = serialize($resArray);
-        sugar_file_put_contents_atomic($file, $out);
+        global $log;
+
+        try {
+            $file = create_cache_directory('modules/AOD_Index/QueryCache/' . md5($queryString));
+            $out = json_encode($resArray, JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE);
+            sugar_file_put_contents_atomic($file, $out);
+        } catch (Throwable $e) {
+            $log->error('[LuceneSearchEngine][cacheQuery] Cache encoding failed: ' . $e->getMessage());
+        }
     }
+
 }
