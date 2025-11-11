@@ -431,6 +431,25 @@ class ListViewData
 
             $pageData = array();
 
+            $staticFieldsCache = [];
+            foreach ($filter_fields as $columnName => $def) {
+                $seedName = strtolower($columnName);
+                $value = $seed->$seedName ?? '';
+                if (empty($value)) {
+                    continue;
+                }
+                $fieldDef = $seed->field_defs[$seedName] ?? [];
+                $fieldDefType = $fieldDef['type'] ?? $fieldDef['custom_type'] ?? '';
+                switch ($fieldDefType) {
+                    case 'html':
+                        $seedName2 = strtoupper($columnName);
+                        $staticFieldsCache[$seedName2] = html_entity_decode($seed->$seedName);
+                        break;
+                    default:
+                        continue 2;
+                }
+            }
+
             reset($rows);
             while ($row = current($rows)) {
                 $temp = clone $seed;
@@ -447,6 +466,11 @@ class ListViewData
                     $pageData['tag'][$dataIndex] = $pageData['tag'][$idIndex[$row[$id_field]][0]];
                 }
                 $data[$dataIndex] = $temp->get_list_view_data($filter_fields);
+
+                foreach ($staticFieldsCache as $fieldName => $staticValue) {
+                    $data[$dataIndex][$fieldName] = $staticValue;
+                }
+
                 $detailViewAccess = $temp->ACLAccess('DetailView');
                 $editViewAccess = $temp->ACLAccess('EditView');
                 $pageData['rowAccess'][$dataIndex] = array('view' => $detailViewAccess, 'edit' => $editViewAccess);
