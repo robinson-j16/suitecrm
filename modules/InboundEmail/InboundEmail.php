@@ -6219,10 +6219,13 @@ class InboundEmail extends SugarBean
 
     /**
      * Returns the stored options property un-encoded and un serialised.
-     * @return array
+     * @return array|false
      */
     public function getStoredOptions()
     {
+        if (empty($this->stored_options)) {
+            return [];
+        }
         return sugar_unserialize(base64_decode($this->stored_options));
     }
 

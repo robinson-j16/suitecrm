@@ -993,6 +993,10 @@ class EmailsController extends SugarController
 
         $inboundEmailStoredOptions = $requestedInboundEmail->getStoredOptions();
 
+        if (!is_array($inboundEmailStoredOptions)) {
+            $inboundEmailStoredOptions = [];
+        }
+
         // if group email account, check that user is allowed to use group email account
         if ($requestedInboundEmail->isGroupEmailAccount()) {
             if (isTrue($inboundEmailStoredOptions['allow_outbound_group_usage'] ?? false)) {

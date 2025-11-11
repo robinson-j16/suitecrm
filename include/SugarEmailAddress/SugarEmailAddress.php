@@ -554,10 +554,11 @@ class SugarEmailAddress extends SugarBean
             return;
         }
 
+        if ($bean->fetched_row === false) {
+            $bean->fetched_row = [];
+        }
+
         if (isset($bean->email1) && !isset($bean->fetched_row['email1'])) {
-            if ($bean->fetched_row === false) {
-                $bean->fetched_row = [];
-            }
             $bean->fetched_row['email1'] = $bean->email1;
         }
 
@@ -1173,6 +1174,10 @@ class SugarEmailAddress extends SugarBean
 
     public function splitEmailAddress($addr)
     {
+        if ($addr === null) {
+            $addr = '';
+        }
+
         $email = $this->_cleanAddress($addr);
         if (!preg_match($this->regex, $email)) {
             $email = ''; // remove bad email addr

@@ -954,8 +954,12 @@ class TimeDate
     // https://github.com/SinergiaTIC/SinergiaCRM/pull/477
     // public function fromString($date, User $user = null)
     public function fromString($date, ?User $user = null)
-    // END STIC Custom    
+    // END STIC Custom
     {
+        if ($date === null) {
+            return null;
+        }
+
         try {
             return new SugarDateTime($date, $this->_getUserTZ($user));
         } catch (Exception $e) {

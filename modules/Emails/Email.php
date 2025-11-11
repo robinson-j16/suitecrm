@@ -4475,7 +4475,10 @@ eoq;
             }
         }
 
-        if (isset($request['from_addr']) && $request['from_addr'] != $request['from_addr_name'] . ' &lt;' . $request['from_addr_email'] . '&gt;') {
+        $fromAddrName = $request['from_addr_name'] ?? '';
+        $fromAddrEmail = $request['from_addr_email'] ?? '';
+
+        if (isset($request['from_addr']) && $request['from_addr'] != $fromAddrName . ' &lt;' . $fromAddrEmail . '&gt;') {
             if (false === strpos((string) $request['from_addr'], '&lt;')) { // we have an email only?
                 $bean->from_addr = $request['from_addr'];
                 isValidEmailAddress($bean->from_addr);
