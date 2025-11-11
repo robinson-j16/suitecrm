@@ -213,6 +213,7 @@ class AOR_ReportsController extends SugarController
 
             $modulusRemainder = $countOfCharts % $chartsPerRow;
 
+            $itemsWithModulus = null;
             if ($modulusRemainder > 0) {
                 $modulusWidth = (100 / $modulusRemainder);
                 $itemsWithModulus = $countOfCharts - $modulusRemainder;

@@ -6594,7 +6594,12 @@ class InboundEmail extends SugarBean
                 $params = [];
             }
 
-            $connection = $this->getImap()->open($mailbox, $username, $password, $options, 0, $params);
+            $error_reporting = error_reporting(E_ERROR | E_PARSE);
+            try {
+                $connection = $this->getImap()->open($mailbox, $username, $password, $options, 0, $params);
+            } finally {
+                error_reporting($error_reporting);
+            }
 
             if (!$connection){
                 break;

@@ -293,7 +293,12 @@ class Imap2Handler implements ImapHandlerInterface
     {
         $this->logCall(__FUNCTION__, func_get_args());
 
-        $mbh = Connection::open($mailbox, $username, $password, $options, $n_retries, $params);
+        $error_reporting = error_reporting(E_ERROR | E_PARSE);
+        try {
+            $mbh = Connection::open($mailbox, $username, $password, $options, $n_retries, $params);
+        } finally {
+            error_reporting($error_reporting);
+        }
         $this->setStream($mbh);
 
         if (empty($mbh) || !is_a($mbh, Connection::class)) {

@@ -196,24 +196,45 @@ class SugarHtml
                         $out .= strtr($template, $replacement);
                     }
                 } else {
-                    $count = 0;
+                    $attributes = [];
                     foreach ($dom_tree as $attr => $value) {
-                        if ($count++ > 0) {
-                            $out .= ' ';
-                        }
-                        if (is_string($value)){
-                            $out .= (empty($value)) ? $attr : $attr.'="'.$value.'"';
+                        $rendered_attr = self::renderHtmlAttribute($attr, $value);
+                        if (empty($rendered_attr)) {
                             continue;
                         }
-                        foreach($value as $key => $v) {
-                            $out .= (empty($v)) ? $key : $key.'="'.$v.'"';
-                        }
+                        $attributes[] = $rendered_attr;
                     }
+                    $out .= implode(' ', $attributes);
                 }
             }
         }
 
         return $out;
+    }
+
+    /**
+     * Render HTML attribute with proper type handling
+     * Handles strings, booleans, numbers, arrays, and objects correctly
+     *
+     * @param string $attr The attribute name
+     * @param mixed $value The attribute value (any type)
+     * @return ?string The rendered HTML attribute
+     */
+    protected static function renderHtmlAttribute(string $attr, mixed $value): ?string
+    {
+        if (is_string($value)) {
+            return empty($value) ? $attr : "$attr=\"$value\"";
+        }
+
+        if (is_array($value) || is_object($value)) {
+            $output = [];
+            foreach ($value as $key => $v) {
+                $output[] = empty($v) ? $key : "$key=\"$v\"";
+            }
+            return implode(' ', $output);
+        }
+
+        return null;
     }
 
     public static function parseSugarHtml($sugar_html = array())
