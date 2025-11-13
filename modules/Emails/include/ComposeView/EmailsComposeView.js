@@ -1636,20 +1636,6 @@
   };
 
   $.fn.EmailsComposeView.defaults = {
-    "tinyMceOptions": {
-      menubar: false,
-      plugins: ['link', 'lists'],
-      toolbar: 'bold italic underline strikethrough | bullist numlist | alignleft aligncenter alignright alignjustify | link unlink | forecolor backcolor | fontfamily fontsize',
-      formats: {
-        bold: {inline: 'b'},
-        italic: {inline: 'i'},
-        underline: {inline: 'u'}
-      },
-      convert_urls: false,
-      relative_urls: false,
-      remove_script_host: false,
-      license_key: 'gpl',
-      promotion: false,
-    }
+    "tinyMceOptions": window.emailTinyMCEConfig
   };
 }(jQuery));
