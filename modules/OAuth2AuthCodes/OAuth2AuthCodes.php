@@ -100,7 +100,7 @@ class OAuth2AuthCodes extends SugarBean
      */
     public function is_revoked()
     {
-        return $this->id === null || $this->auth_code_is_revoked === '1' || new \DateTime() > new \DateTime($this->auth_code_expires);
+        return $this->id === null || isTrue($this->auth_code_is_revoked) || new \DateTime() > new \DateTime($this->auth_code_expires);
     }
 
     /**
