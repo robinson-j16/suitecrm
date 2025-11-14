@@ -195,7 +195,7 @@ class EmailImportService
 
             $lastImportDateCursor = date('Y-m-d', $importDateCursor);
 
-            $unImportedMessages = $this->getUnimportedMessagesForDate($inboundEmailAccount, $lastImportDateCursor);
+            $unImportedMessages = $this->getUnimportedMessagesForDate($inboundEmailAccount, $lastImportDateCursor, $messagesToImport);
             if (empty($unImportedMessages)) {
                 $importDateCursor = strtotime('+1 day', $importDateCursor);
                 continue;
@@ -218,10 +218,11 @@ class EmailImportService
     /**
      * @param AOPInboundEmail $inboundEmailAccount
      * @param string $lastImportDate
+     * @param array $messagesToImport
      * @return void
      * @throws ImapHandlerException
      */
-    protected function getUnimportedMessagesForDate(AOPInboundEmail $inboundEmailAccount, string $lastImportDate): array
+    protected function getUnimportedMessagesForDate(AOPInboundEmail $inboundEmailAccount, string $lastImportDate, array $messagesToImport): array
     {
         $unSeenOnly = $this->getIncludeUnseenConfig();
         $messagesForDate = $inboundEmailAccount->getMessagesFromDate($lastImportDate, $unSeenOnly);
@@ -231,7 +232,9 @@ class EmailImportService
             $messageUids[$messageNumber] = $this->getImapHandler($inboundEmailAccount)->getUid($messageNumber);
         }
 
-        return $this->getUnimportedMessages($messageUids, $inboundEmailAccount->id);
+        $unimportedMessages = $this->getUnimportedMessages($messageUids, $inboundEmailAccount->id);
+
+        return array_diff($unimportedMessages, $messagesToImport);
     }
 
     /**
