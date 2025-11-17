@@ -888,6 +888,53 @@ class SugarView
         require_once('modules/Currencies/Currency.php');
         list($num_grp_sep, $dec_sep) = get_number_separators();
 
+        $php_date_format = $timedate->get_date_format();
+        $php_time_format = $timedate->get_time_format();
+        $php_datetime_format = "$php_date_format $php_time_format";
+        $convertDbTimestampToUserTZJsFunction = <<<JS
+function convertDbTimestampToUserTZ(dbTimestamp) {
+        if (!dbTimestamp) {
+            return null;
+        }
+
+        var utcDate = new Date(dbTimestamp.replace(' ', 'T') + 'Z');
+
+        if (isNaN(utcDate.getTime())) {
+            return null;
+        }
+
+        var userDate = new Date(utcDate.getTime() + ($hour_offset * 1000));
+    
+        const tokens = {
+            Y: () => String(userDate.getUTCFullYear()),
+            y: () => String(userDate.getUTCFullYear()).slice(-2),
+            F: () => userDate.toLocaleString(undefined, { month: 'long', timeZone: 'UTC' }),
+            M: () => userDate.toLocaleString(undefined, { month: 'short', timeZone: 'UTC' }),
+            m: () => String(userDate.getUTCMonth() + 1).padStart(2, '0'),
+            n: () => String(userDate.getUTCMonth() + 1),
+            d: () => String(userDate.getUTCDate()).padStart(2, '0'),
+            j: () => String(userDate.getUTCDate()),
+            D: () => userDate.toLocaleString(undefined, { weekday: 'short', timeZone: 'UTC' }),
+            l: () => userDate.toLocaleString(undefined, { weekday: 'long', timeZone: 'UTC' }),
+            H: () => String(userDate.getUTCHours()).padStart(2, '0'),
+            h: () => String(userDate.getUTCHours() % 12 || 12).padStart(2, '0'),
+            G: () => String(userDate.getUTCHours()),
+            g: () => String(userDate.getUTCHours() % 12 || 12),
+            i: () => String(userDate.getUTCMinutes()).padStart(2, '0'),
+            s: () => String(userDate.getUTCSeconds()).padStart(2, '0'),
+            a: () => userDate.getUTCHours() < 12 ? 'am' : 'pm',
+            A: () => userDate.getUTCHours() < 12 ? 'AM' : 'PM'
+        };
+
+        let formatted = '$php_datetime_format';
+        Object.keys(tokens)
+            .sort((a, b) => b.length - a.length)
+            .forEach(token => formatted = formatted.split(token).join(tokens[token]()));
+
+        return formatted;
+    }
+JS;
+
         $the_script =
             "<script type=\"text/javascript\">\n" .
             "\tvar time_reg_format = '" .
@@ -902,6 +949,7 @@ class SugarView
             "\tvar time_offset = $hour_offset;\n" .
             "\tvar num_grp_sep = '$num_grp_sep';\n" .
             "\tvar dec_sep = '$dec_sep';\n" .
+            "\t$convertDbTimestampToUserTZJsFunction\n" .
             "</script>";
 
         return $the_script;
