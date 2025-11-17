@@ -978,8 +978,8 @@ class Scheduler extends SugarBean
         $sched15->save();
 
         $sched16 = new Scheduler();
-        $sched16->name = $mod_strings['LBL_OOTB_GOOGLE_CAL_SYNC'];
-        $sched16->job = 'function::syncGoogleCalendar';
+        $sched16->name = $mod_strings['LBL_OOTB_CAL_ACC_SYNC'];
+        $sched16->job = 'function::calendarSyncJob';
         $sched16->date_time_start = create_date(2015, 1, 1) . ' ' . create_time(0, 0, 1);
         $sched16->date_time_end = null;
         $sched16->job_interval = '*/15::*::*::*::*';

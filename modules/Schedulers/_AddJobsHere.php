@@ -82,7 +82,7 @@ $job_strings = array(
     14 => 'cleanJobQueue',
     15 => 'removeDocumentsFromFS',
     16 => 'trimSugarFeeds',
-    17 => 'syncGoogleCalendar',
+    17 => 'calendarSyncJob',
     18 => 'runElasticSearchIndexerScheduler',
 );
 
@@ -527,19 +527,49 @@ function trimSugarFeeds()
     return true;
 }
 
-
 /**
  * + * Job 17
- * + * this will sync the Google Calendars of users who are configured to do so
- * + */
-function syncGoogleCalendar()
+ * Unified calendar synchronization job handler that routes to appropriate sync methods based on data type.
+ *
+ * Routes:
+ * - null/empty data → syncs all calendar accounts for all users
+ * - string data → syncs all meetings for a specific calendar account
+ * - object/array data → syncs a specific meeting event
+ *
+ * @param SchedulersJob $job The scheduler job object
+ * @param string $data The data payload determining which sync operation to perform
+ * @return bool True if the synchronization was successful, false otherwise
+ */
+function calendarSyncJob(SchedulersJob $job, string $data = ''): bool
 {
-    global $sugar_config;
-    require_once 'include/GoogleSync/GoogleSync.php';
-    $googleSync = new GoogleSync($sugar_config);
-    $googleSync->syncAllUsers();
+    $GLOBALS['log']->info('[JOB][CalendarSyncJob] Scheduler fired unified calendar sync job');
 
-    return true;
+    require_once 'include/CalendarSync/CalendarSync.php';
+
+    try {
+        $decodedData = html_entity_decode($data, ENT_QUOTES, 'UTF-8');
+
+        $jsonData = json_decode($decodedData, true);
+
+        if (is_array($jsonData)) {
+            $GLOBALS['log']->info('[JOB][CalendarSyncJob] Executing sync meeting event');
+            $jobStatus = CalendarSync::getInstance()->syncEvent($decodedData);
+        } elseif (!empty($decodedData)) {
+            $GLOBALS['log']->info('[JOB][CalendarSyncJob] Executing sync calendar account: ' . $decodedData);
+            CalendarSync::getInstance()->syncAllMeetingsOfCalendarAccount($decodedData);
+            $jobStatus = true;
+        } else {
+            $GLOBALS['log']->info('[JOB][CalendarSyncJob] Executing sync all calendar accounts');
+            $jobStatus = CalendarSync::getInstance()->syncAllCalendarAccounts();
+        }
+
+        $GLOBALS['log']->info("[JOB][CalendarSyncJob] Job finished with status: " . ($jobStatus ? 'success' : 'failure'));
+        return $jobStatus;
+
+    } catch (Throwable $e) {
+        $GLOBALS['log']->fatal("[JOB][CalendarSyncJob] Job failed with exception: " . $e->getMessage());
+        return false;
+    }
 }
 
 function cleanJobQueue($job)
