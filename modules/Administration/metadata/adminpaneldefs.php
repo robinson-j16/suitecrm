@@ -189,6 +189,13 @@ $admin_option_defs['Administration']['aop'] = [
     './index.php?module=Administration&action=AOPAdmin',
     'aop-settings'
 ];
+$admin_option_defs['Administration']['calendar_sync_settings'] = [
+    'CalendarSync',
+    'LBL_CALENDAR_SYNC_SETTINGS',
+    'LBL_CALENDAR_SYNC_SETTINGS_DESC',
+    './index.php?module=Administration&action=CalendarSyncSettings',
+    'system-settings'
+];
 $admin_option_defs['Administration']['configure_group_tabs'] = [
     'ConfigureTabs',
     'LBL_CONFIGURE_GROUP_TABS',

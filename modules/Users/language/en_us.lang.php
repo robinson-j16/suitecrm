@@ -698,4 +698,6 @@ $mod_strings = array(
     'LNK_LIST_INBOUND_EMAIL_ACCOUNTS' => 'Inbound Email Accounts',
     'LNK_EXTERNAL_OAUTH_CONNECTIONS' => 'External OAuth Connections',
 
+    'LNK_LIST_CALENDAR_ACCOUNTS' => 'View Calendar Accounts',
+
 ); // END STRINGS DEFS

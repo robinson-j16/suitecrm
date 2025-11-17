@@ -564,7 +564,10 @@ $modules_exempt_from_availability_check['SurveyQuestionOptions'] = 'SurveyQuesti
 $report_include_modules['SurveyQuestionOptions'] = 'SurveyQuestionOptions';
 $modInvisList[] = 'SurveyQuestionOptions';
 
-
+$beanList['CalendarAccount'] = 'CalendarAccount';
+$beanFiles['CalendarAccount'] = 'modules/CalendarAccount/CalendarAccount.php';
+$modules_exempt_from_availability_check['CalendarAccount'] = 'CalendarAccount';
+$report_include_modules['CalendarAccount'] = 'CalendarAccount';
 
 if (file_exists('include/modules_override.php')) {
     include 'include/modules_override.php';

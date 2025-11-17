@@ -3686,6 +3686,8 @@ $app_list_strings['surveys_matrix_options'][0] = 'Satisfied';
 $app_list_strings['surveys_matrix_options'][1] = 'Neither Satisfied nor Dissatisfied';
 $app_list_strings['surveys_matrix_options'][2] = 'Dissatisfied';
 
+$app_list_strings['moduleList']['CalendarAccount'] = 'Calendar Accounts';
+
 $app_strings['LBL_OPT_IN_PENDING_EMAIL_NOT_SENT'] = 'Pending Confirm opt in, Confirm opt in not sent';
 $app_strings['LBL_OPT_IN_PENDING_EMAIL_FAILED'] = 'Confirm opt in email sending failed';
 $app_strings['LBL_OPT_IN_PENDING_EMAIL_SENT'] = 'Pending Confirm opt in, Confirm opt in sent';
@@ -3740,6 +3742,37 @@ $app_list_strings['search_controllers'] = [
     'UnifiedSearch' => 'Global Unified Search (legacy)'
 ];
 
+// Calendar Account Types dropdown
+$app_list_strings['calendar_account_types'] = [
+    'personal' => 'Personal',
+    'shared' => 'Shared',
+    'group' => 'Group',
+];
+
+// Calendar Connection Status dropdown
+$app_list_strings['calendar_connection_status_list'] = [
+    'never_tested' => 'Never Tested',
+    'success' => 'Connected',
+    'failed' => 'Failed',
+];
+
+// Calendar Sync Attempt Status dropdown
+$app_list_strings['sync_attempt_status_list'] = [
+    '' => '',
+    'in_progress' => 'In Progress',
+    'success' => 'Success',
+    'warning' => 'Warning',
+    'error' => 'Error',
+];
+
+$app_list_strings['sync_attempt_message_list'] = [
+    '' => '',
+    'sync_complete' => 'All meetings synced.',
+    'up_to_date' => 'No new meetings to sync.',
+    'meetings_failed' => 'Some meetings failed to sync. Check logs.',
+    'sync_partial' => 'Some meetings synced. More pending due to limits.',
+    'sync_failed' => 'No meetings synced. Check logs.',
+];
 
 $app_strings['LBL_DEFAULT_API_ERROR_TITLE'] = 'JSON API Error';
 $app_strings['LBL_DEFAULT_API_ERROR_DETAIL'] = 'JSON API Error occurred.';
