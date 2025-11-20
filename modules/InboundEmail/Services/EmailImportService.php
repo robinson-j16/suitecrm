@@ -208,6 +208,10 @@ class EmailImportService
             }
         }
 
+        if ($importDateCursor > $todayDate) {
+            $importDateCursor = $todayDate;
+        }
+
         $lastImportDateCursor = date('Y-m-d', $importDateCursor);
 
         $this->setLastImportedDay($inboundEmailAccount, $mailbox, $lastImportDateCursor);
