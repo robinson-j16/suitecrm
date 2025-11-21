@@ -115,12 +115,10 @@ class EmailImportService
         $sugarFolder = $this->loadFolder($inboundEmailAccount);
         $importedMessages = [];
 
-        foreach ($newMessages as $msgNo) {
+        foreach ($newMessages as $msgNo => $uid) {
 
             if ($inboundEmailAccount->isPop3Protocol()) {
                 $uid = $msgNoToUIDL[$msgNo];
-            } else {
-                $uid = $this->getImapHandler($inboundEmailAccount)->getUid($msgNo);
             }
 
             $importedMessages = $this->importMessage(
