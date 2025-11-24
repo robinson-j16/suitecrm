@@ -88,8 +88,6 @@
     "jeroendesloovere/vcard": "^1.7",
     "mikey179/vfsstream": "1.6.*",
     "mockery/mockery": "^1.1.0",
-    "phpstan/phpstan": "^1.10",
-    "rector/rector": "^0.16.0",
     "phpunit/phpunit": "^10.5",
     "scssphp/scssphp": "^1.5",
     "vlucas/phpdotenv": "^5.5"
