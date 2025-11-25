@@ -266,8 +266,13 @@ function change_state(radiobutton) {
 							<td width="30%"  valign='top'>
 								<input type="number" name="email_import_per_run_threshold" tabindex='1' value="{$email_import_per_run_threshold}">
 							</td>
-							<td scope="row" width="17%"></td>
-							<td></td>
+							<td scope="row" width="17%">
+								{$MOD.LBL_EMAIL_IMPORT_TIMEFRAME_START}:&nbsp;
+								<img border="0" class="inlineHelpTip" onclick="return SUGAR.util.showHelpTips(this,'{$MOD.LBL_EMAIL_IMPORT_TIMEFRAME_START_DESC}','','','dialogHelpPopup')" src="index.php?entryPoint=getImage&themeName={$THEME}&imageName=helpInline.gif">
+							</td>
+							<td>
+								<select name="email_import_timeframe_start">{$email_import_timeframe_start_options}</select>
+							</td>
 						</tr>
 						<tr>
 							<td width="20%" scope="row" valign='top'>

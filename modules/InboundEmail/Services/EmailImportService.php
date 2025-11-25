@@ -46,7 +46,7 @@ class EmailImportService
         $inboundEmailAccount = new AOPInboundEmail();
         $loadResult = $inboundEmailAccount->retrieve($inboundEmailRow['id']);
 
-        if (!$loadResult || !$inboundEmailAccount->id) {
+        if (!$loadResult || !$inboundEmailAccount->id || $inboundEmailAccount->status !== 'Active') {
             $this->log('error', "Error retrieving AOP Inbound Email: '" . $inboundEmailRow['id'] . "'");
             return false;
         }
@@ -178,7 +178,8 @@ class EmailImportService
         $lastImportDateCursor = $this->getLastImportedDay($inboundEmailAccount, $mailbox);
 
         if (empty($lastImportDateCursor)) {
-            $lastImportDateCursor = date('Y-m-d', strtotime('-30 days'));
+            $defaultTimeframeStart = $this->getImportTimeframeStartConfig();
+            $lastImportDateCursor = date('Y-m-d', strtotime($defaultTimeframeStart));
         }
 
         $today = getdate();
@@ -256,7 +257,7 @@ class EmailImportService
         foreach ($messageUids as $messageUid) {
             $quotedMessageUids[] = $db->quote($messageUid);
         }
-        $inClause = "'" .implode("','", $quotedMessageUids). "'";
+        $inClause = "'" . implode("','", $quotedMessageUids) . "'";
 
         $quotedMailboxId = $db->quote($mailboxId);
         $query = "SELECT uid FROM emails WHERE uid IN ({$inClause}) AND mailbox_id = '$quotedMailboxId' AND deleted = 0";
@@ -570,6 +571,26 @@ class EmailImportService
         }
 
         return 25;
+    }
+
+    protected function getImportTimeframeStartConfig(): string
+    {
+        $configurator = new Configurator();
+        $configurator->loadConfig();
+
+        $timeframeStart = $configurator->config['email_import_timeframe_start'] ?? '';
+        $timeframeStart = is_string($timeframeStart) ? trim($timeframeStart) : '';
+        $default = '-30 days';
+
+        if ($timeframeStart === '') {
+            return $default;
+        }
+
+        if (preg_match('/^-\s*\d+\s+(days|day|months|month|years|year)$/i', $timeframeStart)) {
+            return $timeframeStart;
+        }
+
+        return $default;
     }
 
     /**

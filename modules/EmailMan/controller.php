@@ -93,6 +93,7 @@ class EmailManController extends SugarController
             $configurator->config['email_allow_send_as_user']  = (isset($_REQUEST['mail_allowusersend']) && $_REQUEST['mail_allowusersend'] == '1') ? true : false;
             $configurator->config['email_import_per_run_threshold']  = $_REQUEST['email_import_per_run_threshold'] ?? $configurator->config['email_import_per_run_threshold'];
             $configurator->config['email_import_fetch_unread_only']  = isset($_REQUEST['email_import_fetch_unread_only']) && isTrue($_REQUEST['email_import_fetch_unread_only']);
+            $configurator->config['email_import_timeframe_start']  = $_REQUEST['email_import_timeframe_start'] ?? $configurator->config['email_import_timeframe_start'];
             $configurator->config['legacy_email_behaviour']  = isTrue($_REQUEST['legacy_email_behaviour'] ?? false);
             ///////////////////////////////////////////////////////////////////////////////
             ////	SECURITY

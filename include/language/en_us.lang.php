@@ -3810,3 +3810,14 @@ $app_strings['LBL_INBOUND_ACCOUNT'] = 'Inbound Account';
 $app_strings['LBL_SYSTEM_ACCOUNT'] = 'System Account';
 $app_strings['LBL_FROM_SYSTEM'] = 'Send From System';
 $app_strings['LBL_SIGNATURE'] = 'Signature';
+
+$app_list_strings['email_import_timeframe_start_dom'] = [
+    '-1 year' => '1 Year',
+    '-6 months' => '6 Months',
+    '-3 months' => '3 Months',
+    '-30 days' => '30 Days',
+    '-15 days' => '15 Days',
+    '-5 days' => '5 Days',
+    '-1 days' => '1 Day',
+    '0 days' => '0 Days',
+];

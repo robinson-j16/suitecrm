@@ -288,8 +288,9 @@ function make_sugar_config(&$sugar_config)
         'trusted_hosts' => [],
         'oauth_token_delete_threshold' => '-7 days',
         'oauth_code_delete_threshold' => '-7 days',
-        'email_import_batch_size' => 25,
-        'email_import_fetch_unread_only' => false
+        'email_import_per_run_threshold' => 25,
+        'email_import_fetch_unread_only' => false,
+        'email_import_timeframe_start' => '-30 days'
     );
 }
 
@@ -588,8 +589,9 @@ function get_sugar_config_defaults(): array
         'trusted_hosts' => [],
         'oauth_token_delete_threshold' => '-7 days',
         'oauth_code_delete_threshold' => '-7 days',
-        'email_import_batch_size' => 25,
-        'email_import_fetch_unread_only' => false
+        'email_import_per_run_threshold' => 25,
+        'email_import_fetch_unread_only' => false,
+        'email_import_timeframe_start' => '-30 days'
     ];
 
     if (!is_object($locale)) {
