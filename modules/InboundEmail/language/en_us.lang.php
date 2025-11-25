@@ -222,5 +222,5 @@ $mod_strings = array(
 
     'LBL_MOVE_MESSAGES_TO_TRASH_AFTER_IMPORT' => 'Move Messages To Trash After Import?',
     'LBL_LAST_IMPORT_RUN_DATETIME' => 'Last Import Run Date/Time',
-    'LBL_MAILBOX_LAST_IMPORTED_DAYS' => 'Mailbox last imported days',
+    'LBL_MAILBOX_LAST_IMPORTED_DAYS' => 'Last Imported Date Per Mailbox',
 );
