@@ -109,6 +109,8 @@ class Call extends SugarBean
     public $syncing = false;
     public $recurring_source;
 
+    public $date_changed = false;
+
     // This is used to retrieve related fields from form posts.
     public $additional_column_fields = array('assigned_user_name', 'assigned_user_id', 'contact_id', 'user_id', 'contact_name');
     public $relationship_fields = array(	'account_id'		=> 'accounts',
@@ -554,6 +556,34 @@ class Call extends SugarBean
         $call_fields['EMAIL_REMINDER_CHECKED'] = $this->email_reminder_time==-1 ? false : true;
 
         return $call_fields;
+    }
+
+    /**
+     * Redefine method to attach ics file to notification email
+     */
+    public function create_notification_email($notify_user)
+    {
+        // reset acceptance status for non organizer if date is changed
+        if (($notify_user->id != $GLOBALS['current_user']->id) && $this->date_changed) {
+            $this->set_accept_status($notify_user, 'none');
+        }
+
+        $notify_mail = parent::create_notification_email($notify_user);
+
+        $path = SugarConfig::getInstance()->get('upload_dir', 'upload/') . $this->id;
+
+        require_once("modules/vCals/vCal.php");
+        $content = vCal::get_ical_event($this, $GLOBALS['current_user'], $notify_user);
+
+        if (is_dir($path)) {
+            LoggerManager::getLogger()->warn('file_put_contents(' . $path . '): failed to open stream: Is a directory ');
+        } else {
+            if (file_put_contents($path, $content)) {
+                $notify_mail->Ical = $content;
+                $notify_mail->AddAttachment($path, 'call.ics', 'base64', 'text/calendar');
+            }
+        }
+        return $notify_mail;
     }
 
     public function set_notification_body($xtpl, $call)

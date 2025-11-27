@@ -369,7 +369,7 @@
                 $GLOBALS['timedate']->getNow(false)->format(self::UTC_FORMAT)
             );
             $ical_array[] = array("SUMMARY", $bean->name);
-            $ical_array[] = array("LOCATION", $bean->location);
+            $ical_array[] = array("LOCATION", $bean->location ?? '');
 
             $descPrepend = empty($bean->join_url) ? "" : $bean->join_url . self::EOL . self::EOL;
             $ical_array[] = array("DESCRIPTION", $descPrepend . $bean->description);
