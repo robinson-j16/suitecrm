@@ -177,7 +177,6 @@ class CalendarAccountRepository
         }
 
         if ($validatedOnly) {
-            $whereClauses[] = "calendar_accounts.last_connection_status = '1'";
             $whereClauses[] = "calendar_accounts.calendar_user_id IS NOT NULL";
             $whereClauses[] = "calendar_accounts.calendar_user_id != ''";
         }
@@ -185,6 +184,12 @@ class CalendarAccountRepository
         if (!$includeDeleted || $validatedOnly) {
             $whereClauses[] = "calendar_accounts.deleted = 0";
         }
+
+        $orderByClauses = [
+            'calendar_accounts.last_sync_attempt_date IS NOT NULL',
+            'calendar_accounts.last_sync_attempt_date ASC',
+            'calendar_accounts.date_entered DESC',
+        ];
 
         try {
             $sql = "SELECT $calendarAccount->table_name.id FROM $calendarAccount->table_name";
@@ -194,7 +199,8 @@ class CalendarAccountRepository
                 $sql .= " WHERE $whereClause";
             }
 
-            $sql .= " ORDER BY last_sync_attempt_date IS NOT NULL, last_sync_attempt_date ASC, date_entered DESC";
+            $orderByClause = implode(', ', $orderByClauses);
+            $sql .= " ORDER BY $orderByClause";
 
             if ($limit !== null) {
                 $sql .= " LIMIT $limit";

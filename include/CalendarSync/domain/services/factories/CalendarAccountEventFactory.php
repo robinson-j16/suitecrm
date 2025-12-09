@@ -66,7 +66,7 @@ class CalendarAccountEventFactory
      */
     public function fromBean(Meeting|Call|Task $bean, CalendarAccount $calendarAccount): CalendarAccountEvent
     {
-        global $timedate, $current_user;
+        global $timedate;
 
         $date_end = '';
         if ($bean->object_name === 'Task') {
@@ -76,7 +76,7 @@ class CalendarAccountEventFactory
             $date_start = $bean->date_start ?? '';
         }
 
-        $startDateTime = $timedate->fromUser($date_start, $current_user) ?? $timedate->getNow();
+        $startDateTime = $this->parseDateTimeString($date_start) ?? $timedate->getNow();
 
         if (!empty($bean->date_end)) {
             $date_end = $bean->date_end;
@@ -87,13 +87,13 @@ class CalendarAccountEventFactory
                 $startTime = $startDateTime->getTimestamp();
                 $endTime = $startTime + ($hours * 3600) + ($minutes * 60);
                 $endDateTime = $timedate->fromTimestamp($endTime);
-                $date_end = $timedate->asUser($endDateTime, $current_user);
+                $date_end = $timedate->asDb($endDateTime);
             }
         }
 
-        $endDateTime = $timedate->fromUser($date_end, $current_user) ?? $endDateTime = $timedate->getNow();
+        $endDateTime = $this->parseDateTimeString($date_end) ?? $startDateTime;
 
-        $dateModifiedDateTime =  $timedate->fromUser($bean->date_modified, $current_user) ?? new DateTime();
+        $dateModifiedDateTime = $this->parseDateTimeString($bean->date_modified) ?? new DateTime();
 
         $type = match ($bean->object_name) {
             'Call' => CalendarEventType::CALL,
@@ -165,6 +165,29 @@ class CalendarAccountEventFactory
             linked_event_id: $sourceEvent->getId(),
             is_external: !$sourceEvent->isExternal()
         );
+    }
+
+    /**
+     * @param string $dateString
+     * @return SugarDateTime|null
+     */
+    private function parseDateTimeString(string $dateString): ?SugarDateTime
+    {
+        global $timedate, $current_user;
+
+        if (empty($dateString)) {
+            return null;
+        }
+
+        if ($timedate->check_matching_format($dateString, TimeDate::DB_DATETIME_FORMAT)) {
+            return $timedate->fromDb($dateString);
+        }
+
+        if ($timedate->check_matching_format($dateString, TimeDate::DB_DATE_FORMAT)) {
+            return $timedate->fromDbDate($dateString);
+        }
+
+        return $timedate->fromUser($dateString, $current_user);
     }
 
 }
