@@ -67,14 +67,12 @@ class Controller extends AbstractController
     public function doSave(): void
     {
         $searchEngine = filter_input(INPUT_POST, 'search-engine');
-        $aod = $searchEngine === 'BasicAndAodEngine';
 
         SearchConfigurator::make()
             ->setEngine($searchEngine)
             ->save();
 
         SearchModules::saveGlobalSearchSettings();
-        $this->doSaveAODConfig($aod);
 
         if ($this->isAjax()) {
             $this->yieldJson(['status' => 'success']);
@@ -82,23 +80,5 @@ class Controller extends AbstractController
 
         $this->redirect('index.php?module=Administration&action=index');
     }
-
-    /**
-     * Saves the configuration getting data from POST.
-     * @param bool $enabled
-     */
-    public function doSaveAODConfig(bool $enabled): void
-    {
-        $cfg = new Configurator();
-
-        if (!array_key_exists('aod', $cfg->config)) {
-            $cfg->config['aod'] = [
-                'enable_aod' => '',
-            ];
-        }
-
-        $cfg->config['aod']['enable_aod'] = $enabled;
-
-        $cfg->saveConfig();
-    }
+    
 }
