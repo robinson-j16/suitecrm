@@ -65,7 +65,7 @@
     "symfony/yaml": "^6.4",
     "tecnickcom/tcpdf": "^6.10",
     "tedivm/jshrink": "^1.3",
-    "tinymce/tinymce": "^7.2",
+    "tinymce/tinymce": "^8",
     "voku/anti-xss": "^4.0",
     "wikimedia/composer-merge-plugin": "^2.0",
     "zbateson/mail-mime-parser": "^2.4",
