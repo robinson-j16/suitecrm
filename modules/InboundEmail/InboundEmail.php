@@ -306,6 +306,9 @@ class InboundEmail extends SugarBean
     public ?string $last_import_run_datetime;
 
     public ?string $mailbox_last_imported_days;
+    public $email_import_per_run_threshold;
+    public $email_import_timeframe_start;
+    public $email_import_unread_only;
 
 
     /**
@@ -392,6 +395,10 @@ class InboundEmail extends SugarBean
         if (!empty($ret) && !$this->hasAccessToPersonalAccount()) {
             $this->logPersonalAccountAccessDenied('retrieve');
             return null;
+        }
+
+        if (!empty($ret)) {
+            $this->initializeEmailImportSettings($ret);
         }
 
         return $ret;
@@ -8758,6 +8765,111 @@ eoq;
         $oAuthConnectionId = $this->external_oauth_connection_id ?? '';
 
         return $authType === 'oauth' && $oAuthConnectionId !== '';
+    }
+
+    /**
+     * Initializes email import settings for the given InboundEmail record.
+     * @param InboundEmail|null $inboundEmail
+     * @return void
+     */
+    public function initializeEmailImportSettings(?InboundEmail $inboundEmail): void
+    {
+        if (empty($inboundEmail)) {
+            return;
+        }
+
+        $this->initializeImportUnreadOnly($inboundEmail);
+        $this->initializeImportTimeframeStart($inboundEmail);
+        $this->initializeImportThreshold($inboundEmail);
+    }
+
+    /**
+     * Initializes the import unread only setting for the given InboundEmail record.
+     * @param InboundEmail|null $inboundEmail
+     * @return void
+     */
+    protected function initializeImportUnreadOnly(?InboundEmail $inboundEmail): void
+    {
+        if ($inboundEmail === null) {
+            return;
+        }
+
+        $unreadOnly = $inboundEmail->email_import_unread_only ?? null;
+        if ($unreadOnly !== null && $unreadOnly !== '') {
+            return;
+        }
+
+        $configurator = new Configurator();
+        $configurator->loadConfig();
+
+        $globalUnreadOnly = $configurator->config['email_import_fetch_unread_only'] ?? true;
+
+        $inboundEmail->email_import_unread_only = isTrue($globalUnreadOnly);
+    }
+
+    /**
+     * Initializes the import timeframe start setting for the given InboundEmail record.
+     * @param InboundEmail|null $inboundEmail
+     * @return void
+     */
+    protected function initializeImportTimeframeStart(?InboundEmail $inboundEmail): void
+    {
+        if ($inboundEmail === null) {
+            return;
+        }
+
+        $timeframeStart = $inboundEmail->email_import_timeframe_start ?? null;
+        if (is_string($timeframeStart) && preg_match('/^-\s*\d+\s+(days|day|months|month|years|year)$/i', trim($timeframeStart))) {
+            return;
+        }
+
+        $configurator = new Configurator();
+        $configurator->loadConfig();
+
+        $timeframeStart = $configurator->config['email_import_timeframe_start'] ?? '';
+        $timeframeStart = is_string($timeframeStart) ? trim($timeframeStart) : '';
+        $default = '-30 days';
+
+        if ($timeframeStart === '') {
+            $inboundEmail->email_import_timeframe_start = $default;
+            return;
+        }
+
+        if (preg_match('/^-\s*\d+\s+(days|day|months|month|years|year)$/i', $timeframeStart)) {
+            $inboundEmail->email_import_timeframe_start = $timeframeStart;
+            return;
+        }
+
+        $inboundEmail->email_import_timeframe_start = $default;
+    }
+
+    /**
+     * Initializes the import threshold setting for the given InboundEmail record.
+     * @param InboundEmail|null $inboundEmail
+     * @return void
+     */
+    protected function initializeImportThreshold(?InboundEmail $inboundEmail): void
+    {
+        if ($inboundEmail === null) {
+            return;
+        }
+        $threshold = $inboundEmail->email_import_per_run_threshold ?? null;
+        if (is_numeric($threshold) && $threshold > 0) {
+            return;
+        }
+
+        $configurator = new Configurator();
+        $configurator->loadConfig();
+        if (
+            isset($configurator->config['email_import_per_run_threshold']) &&
+            is_numeric($configurator->config['email_import_per_run_threshold']) &&
+            $configurator->config['email_import_per_run_threshold'] > 0
+        ) {
+            $inboundEmail->email_import_per_run_threshold = (int)$configurator->config['email_import_per_run_threshold'];
+            return;
+        }
+
+        $inboundEmail->email_import_per_run_threshold = 25;
     }
 
 
