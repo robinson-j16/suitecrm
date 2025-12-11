@@ -178,14 +178,14 @@ class EmailImportService
         $lastImportDateCursor = $this->getLastImportedDay($inboundEmailAccount, $mailbox);
 
         if (empty($lastImportDateCursor)) {
-            $defaultTimeframeStart = $this->getImportTimeframeStartConfig();
+            $defaultTimeframeStart = $this->getImportTimeframeStartConfig($inboundEmailAccount);
             $lastImportDateCursor = date('Y-m-d', strtotime($defaultTimeframeStart));
         }
 
         $today = getdate();
 
         $messagesToImport = [];
-        $messageLimit = $this->getMessageLimitConfig();
+        $messageLimit = $this->getMessageLimitConfig($inboundEmailAccount);
 
         $importDateCursor = strtotime($lastImportDateCursor);
         $todayDate = mktime(0, 0, 0, $today['mon'], $today['mday'], $today['year']);
@@ -222,12 +222,12 @@ class EmailImportService
      * @param AOPInboundEmail $inboundEmailAccount
      * @param string $lastImportDate
      * @param array $messagesToImport
-     * @return void
+     * @return array
      * @throws ImapHandlerException
      */
     protected function getUnimportedMessagesForDate(AOPInboundEmail $inboundEmailAccount, string $lastImportDate, array $messagesToImport): array
     {
-        $unSeenOnly = $this->getIncludeUnseenConfig();
+        $unSeenOnly = $this->getUnreadOnlyConfig($inboundEmailAccount);
         $messagesForDate = $inboundEmailAccount->getMessagesFromDate($lastImportDate, $unSeenOnly);
 
         $messageUids = [];
@@ -548,18 +548,28 @@ class EmailImportService
         return $db;
     }
 
-    protected function getIncludeUnseenConfig(): bool
+    protected function getUnreadOnlyConfig(AOPInboundEmail $inboundEmailAccount): bool
     {
+        $unreadOnly = $inboundEmailAccount->email_import_unread_only ?? null;
+        if ($unreadOnly !== null && $unreadOnly !== '') {
+            return isTrue($unreadOnly);
+        }
+
         $configurator = new Configurator();
         $configurator->loadConfig();
 
-        $includeUnseen = $configurator->config['email_import_fetch_unread_only'] ?? false;
+        $globalUnreadOnly = $configurator->config['email_import_fetch_unread_only'] ?? true;
 
-        return isTrue($includeUnseen);
+        return isTrue($globalUnreadOnly);
     }
 
-    protected function getMessageLimitConfig(): int
+    protected function getMessageLimitConfig(AOPInboundEmail $inboundEmailAccount): int
     {
+        $threshold = $inboundEmailAccount->email_import_per_run_threshold ?? null;
+        if (is_numeric($threshold) && $threshold > 0) {
+            return (int)$threshold;
+        }
+
         $configurator = new Configurator();
         $configurator->loadConfig();
         if (
@@ -573,8 +583,13 @@ class EmailImportService
         return 25;
     }
 
-    protected function getImportTimeframeStartConfig(): string
+    protected function getImportTimeframeStartConfig(AOPInboundEmail $inboundEmailAccount): string
     {
+        $timeframeStart = $inboundEmailAccount->email_import_timeframe_start ?? null;
+        if (is_string($timeframeStart) && preg_match('/^-\s*\d+\s+(days|day|months|month|years|year)$/i', trim($timeframeStart))) {
+            return $timeframeStart;
+        }
+
         $configurator = new Configurator();
         $configurator->loadConfig();
 
