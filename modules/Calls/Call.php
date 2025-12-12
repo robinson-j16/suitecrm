@@ -563,12 +563,18 @@ class Call extends SugarBean
      */
     public function create_notification_email($notify_user)
     {
+        global $sugar_config;
         // reset acceptance status for non organizer if date is changed
         if (($notify_user->id != $GLOBALS['current_user']->id) && $this->date_changed) {
             $this->set_accept_status($notify_user, 'none');
         }
 
         $notify_mail = parent::create_notification_email($notify_user);
+
+        $calendarInviteType = $sugar_config['email_calendar_invite_type'] ?? 'rsvp_ics';
+        if ($calendarInviteType !== 'rsvp_ics') {
+            return $notify_mail;
+        }
 
         $path = SugarConfig::getInstance()->get('upload_dir', 'upload/') . $this->id;
 
@@ -620,6 +626,11 @@ class Call extends SugarBean
         $xtpl->assign("CALL_MINUTES", $call->duration_minutes);
         $xtpl->assign("CALL_STATUS", ((isset($call->status))?$app_list_strings['call_status_dom'][$call->status] : ""));
         $xtpl->assign("CALL_DESCRIPTION", nl2br($call->description));
+
+        $calendarInviteType = $sugar_config['email_calendar_invite_type'] ?? 'rsvp_ics';
+        if ($calendarInviteType === 'rsvp_links') {
+            $xtpl->parse('Call.Call_Links');
+        }
 
         return $xtpl;
     }

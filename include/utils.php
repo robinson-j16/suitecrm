@@ -290,7 +290,8 @@ function make_sugar_config(&$sugar_config)
         'oauth_code_delete_threshold' => '-7 days',
         'email_import_per_run_threshold' => 25,
         'email_import_fetch_unread_only' => false,
-        'email_import_timeframe_start' => '-30 days'
+        'email_import_timeframe_start' => '-30 days',
+        'email_calendar_invite_type' => 'rsvp_ics'
     );
 }
 
@@ -591,7 +592,8 @@ function get_sugar_config_defaults(): array
         'oauth_code_delete_threshold' => '-7 days',
         'email_import_per_run_threshold' => 25,
         'email_import_fetch_unread_only' => false,
-        'email_import_timeframe_start' => '-30 days'
+        'email_import_timeframe_start' => '-30 days',
+        'email_calendar_invite_type' => 'rsvp_ics'
     ];
 
     if (!is_object($locale)) {

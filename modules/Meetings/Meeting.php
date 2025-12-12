@@ -695,6 +695,11 @@ class Meeting extends SugarBean
             $xtpl->parse('Meeting.Meeting_External_API');
         }
 
+        $calendarInviteType = $sugar_config['email_calendar_invite_type'] ?? 'rsvp_ics';
+        if ($calendarInviteType === 'rsvp_links') {
+            $xtpl->parse('Meeting.Meeting_Links');
+        }
+
         return $xtpl;
     }
 
@@ -703,12 +708,18 @@ class Meeting extends SugarBean
      */
     public function create_notification_email($notify_user)
     {
+        global $sugar_config;
         // reset acceptance status for non organizer if date is changed
         if (($notify_user->id != $GLOBALS['current_user']->id) && $this->date_changed) {
             $this->set_accept_status($notify_user, 'none');
         }
 
         $notify_mail = parent::create_notification_email($notify_user);
+
+        $calendarInviteType = $sugar_config['email_calendar_invite_type'] ?? 'rsvp_ics';
+        if ($calendarInviteType !== 'rsvp_ics') {
+            return $notify_mail;
+        }
 
         $path = SugarConfig::getInstance()->get('upload_dir', 'upload/') . $this->id;
 
