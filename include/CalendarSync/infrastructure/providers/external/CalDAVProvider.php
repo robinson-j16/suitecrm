@@ -251,6 +251,7 @@ class CalDAVProvider extends AbstractCalendarProvider
             $log->info('CalDAVProvider: Retrieved ' . count($events) . ' events from CalDAV server');
         } catch (Throwable $e) {
             $log->error('CalDAVProvider: getEvents error: ' . $e->getMessage());
+            throw $e;
         }
 
         return $events;

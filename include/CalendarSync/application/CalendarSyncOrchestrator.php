@@ -150,6 +150,7 @@ class CalendarSyncOrchestrator
      * @return bool Returns true if synchronization is partially or fully completed successfully,
      *              or if asynchronous job creation is successful. Returns false if there are no
      *              events to synchronize.
+     * @throws Throwable
      */
     public function syncCalendarAccount(CalendarAccount $calendarAccount, ?bool $async = false): bool
     {
@@ -205,7 +206,7 @@ class CalendarSyncOrchestrator
         } catch (Throwable $e) {
             $GLOBALS['log']->error("[CalendarSyncOrchestrator][syncCalendarAccount] Sync failed for account $calendarAccountId: " . $e->getMessage());
             $this->updateSyncAttemptError($calendarAccount);
-            return false;
+            throw $e;
         }
     }
 
