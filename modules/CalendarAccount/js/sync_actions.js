@@ -114,10 +114,12 @@ window.CalendarSync = window.CalendarSync || (function () {
             var isSuccess = xhr.status === 200 && response.status === 'success';
             showResponseMessage(isSuccess ? response.data : response.message, isSuccess);
 
-            setTimeout(function() {
-                window.location.reload();
-            }, isSuccess ? 1500 : 2000);
-            return;
+            if (isSuccess) {
+                setTimeout(function() {
+                    window.location.reload();
+                }, 1500);
+                return;
+            }
         } catch (e) {
             showPopupMessage(getLabel('LBL_SYNC_RESPONSE_ERROR'));
             console.error('CalendarAccount sync response parse error:', e, xhr.responseText);
