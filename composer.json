@@ -60,6 +60,7 @@
     "slim/slim": "^3.8",
     "smarty/smarty": "^4",
     "soundasleep/html2text": "^2",
+    "symfony/options-resolver": "^6.4",
     "symfony/polyfill-uuid": "^1.32",
     "symfony/validator": "^6.4",
     "symfony/yaml": "^6.4",
