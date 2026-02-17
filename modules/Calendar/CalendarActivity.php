@@ -5,7 +5,7 @@
  * SugarCRM, Inc. Copyright (C) 2004-2013 SugarCRM Inc.
  *
  * SuiteCRM is an extension to SugarCRM Community Edition developed by SalesAgility Ltd.
- * Copyright (C) 2011 - 2018 SalesAgility Ltd.
+ * Copyright (C) 2011 - 2024 SalesAgility Ltd.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by the
@@ -44,6 +44,7 @@ if (!defined('sugarEntry') || !sugarEntry) {
 
 require_once 'include/utils/activity_utils.php';
 
+#[\AllowDynamicProperties]
 class CalendarActivity
 {
     public $sugar_bean;
@@ -131,7 +132,7 @@ class CalendarActivity
             $end_ts_obj,
             $field_name,
             $field_end_date,
-            array('self', 'within')
+            array('CalendarActivity', 'within')
         );
     }
 
@@ -160,7 +161,7 @@ class CalendarActivity
             $end_ts_obj,
             $field_name,
             $field_end_date,
-            array('self', 'until')
+            array('CalendarActivity', 'until')
         );
     }
 
@@ -225,7 +226,8 @@ class CalendarActivity
         }
 
         foreach ($activities as $key => $activity) {
-            if ($key === 'Tasks' && !$show_tasks) {
+            if ($key === 'Tasks' && !$show_tasks ||
+                $key === 'Calls' && !$show_calls) {
                 continue;
             }
 

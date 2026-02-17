@@ -1,27 +1,28 @@
 <?php
 /**
- * Products, Quotations & Invoices modules.
- * Extensions to SugarCRM
- * @package Advanced OpenSales for SugarCRM
- * @subpackage Products
- * @copyright SalesAgility Ltd http://www.salesagility.com
+ * SuiteCRM is a customer relationship management program developed by SuiteCRM Ltd.
+ * Copyright (C) 2011 - 2025 SuiteCRM Ltd.
  *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU AFFERO GENERAL PUBLIC LICENSE as published by
- * the Free Software Foundation; either version 3 of the License, or
- * (at your option) any later version.
+ * This program is free software; you can redistribute it and/or modify it under
+ * the terms of the GNU Affero General Public License version 3 as published by the
+ * Free Software Foundation with the addition of the following permission added
+ * to Section 15 as permitted in Section 7(a): FOR ANY PART OF THE COVERED WORK
+ * IN WHICH THE COPYRIGHT IS OWNED BY SUITECRM, SUITECRM DISCLAIMS THE
+ * WARRANTY OF NON INFRINGEMENT OF THIRD PARTY RIGHTS.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more
+ * details.
  *
- * You should have received a copy of the GNU AFFERO GENERAL PUBLIC LICENSE
- * along with this program; if not, see http://www.gnu.org/licenses
- * or write to the Free Software Foundation,Inc., 51 Franklin Street,
- * Fifth Floor, Boston, MA 02110-1301  USA
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
- * @author SalesAgility Ltd <support@salesagility.com>
+ * In accordance with Section 7(b) of the GNU Affero General Public License
+ * version 3, these Appropriate Legal Notices must retain the display of the
+ * "Supercharged by SuiteCRM" logo. If the display of the logos is not reasonably
+ * feasible for technical reasons, the Appropriate Legal Notices must display
+ * the words "Supercharged by SuiteCRM".
  */
 
 /**
@@ -29,6 +30,7 @@
  */
 require_once('modules/AOS_Contracts/AOS_Contracts_sugar.php');
 
+#[\AllowDynamicProperties]
 class AOS_Contracts extends AOS_Contracts_sugar
 {
     public function __construct()
@@ -98,6 +100,7 @@ class AOS_Contracts extends AOS_Contracts_sugar
 
     public function createReminder()
     {
+        global $mod_strings;
         require_once('modules/Calls/Call.php');
         $call = new call();
 
@@ -111,7 +114,7 @@ class AOS_Contracts extends AOS_Contracts_sugar
             $call->parent_id = $this->id;
             $call->parent_type = 'AOS_Contracts';
             $call->date_start = $this->renewal_reminder_date;
-            $call->name = $this->name . ' Contract Renewal Reminder';
+            $call->name = $this->name . $mod_strings['LBL_RENEWAL_REMINDER'];
             $call->assigned_user_id = $this->assigned_user_id;
             $call->status = 'Planned';
             $call->direction = 'Outbound';

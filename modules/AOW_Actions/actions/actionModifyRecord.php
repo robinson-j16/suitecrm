@@ -1,25 +1,28 @@
 <?php
 /**
- * Advanced OpenWorkflow, Automating SugarCRM.
- * @package Advanced OpenWorkflow for SugarCRM
- * @copyright SalesAgility Ltd http://www.salesagility.com
+ * SuiteCRM is a customer relationship management program developed by SuiteCRM Ltd.
+ * Copyright (C) 2011 - 2025 SuiteCRM Ltd.
  *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU AFFERO GENERAL PUBLIC LICENSE as published by
- * the Free Software Foundation; either version 3 of the License, or
- * (at your option) any later version.
+ * This program is free software; you can redistribute it and/or modify it under
+ * the terms of the GNU Affero General Public License version 3 as published by the
+ * Free Software Foundation with the addition of the following permission added
+ * to Section 15 as permitted in Section 7(a): FOR ANY PART OF THE COVERED WORK
+ * IN WHICH THE COPYRIGHT IS OWNED BY SUITECRM, SUITECRM DISCLAIMS THE
+ * WARRANTY OF NON INFRINGEMENT OF THIRD PARTY RIGHTS.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more
+ * details.
  *
- * You should have received a copy of the GNU AFFERO GENERAL PUBLIC LICENSE
- * along with this program; if not, see http://www.gnu.org/licenses
- * or write to the Free Software Foundation,Inc., 51 Franklin Street,
- * Fifth Floor, Boston, MA 02110-1301  USA
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
- * @author SalesAgility <info@salesagility.com>
+ * In accordance with Section 7(b) of the GNU Affero General Public License
+ * version 3, these Appropriate Legal Notices must retain the display of the
+ * "Supercharged by SuiteCRM" logo. If the display of the logos is not reasonably
+ * feasible for technical reasons, the Appropriate Legal Notices must display
+ * the words "Supercharged by SuiteCRM".
  */
 
 
@@ -37,11 +40,11 @@ class actionModifyRecord extends actionCreateRecord
         return parent::loadJS();
     }
 
-    public function edit_display($line, SugarBean $bean = null, $params = array())
+    public function edit_display($line, ?SugarBean $bean = null, $params = array())
     {
         require_once("modules/AOW_WorkFlow/aow_utils.php");
 
-        $modules = getModuleRelationships($bean->module_dir, 'EditView', $params['rel_type']);
+        $modules = getModuleRelationships($bean->module_dir, 'EditView', $params['rel_type'] ?? '');
 
         $html = "<input type='hidden' name='aow_actions_param[".$line."][record_type]' id='aow_actions_param_record_type".$line."' value='' />";
         $html .= "<table border='0' cellpadding='0' cellspacing='0' width='100%' data-workflow-action='modify-record'>";
@@ -77,21 +80,21 @@ class actionModifyRecord extends actionCreateRecord
 EOS;
 
 
-        $module = getRelatedModule($bean->module_name, $params['rel_type']);
+        $module = getRelatedModule($bean->module_name, $params['rel_type'] ?? '');
         $html .= "cr_module[" . $line . "] = \"" . $module . "\";";
         $html .= "cr_fields[" . $line . "] = \"" . trim(preg_replace(
             '/\s+/',
             ' ',
-            getModuleFields($module, 'EditView', '', array(), array('email1', 'email2'))
+            (string) getModuleFields($module, 'EditView', '', array(), array('email1', 'email2'))
         )) . "\";";
-        $html .= "cr_relationships[".$line."] = \"".trim(preg_replace('/\s+/', ' ', getModuleRelationships($module)))."\";";
+        $html .= "cr_relationships[".$line."] = \"".trim(preg_replace('/\s+/', ' ', (string) getModuleRelationships($module)))."\";";
         if ($params && array_key_exists('field', $params)) {
             foreach ($params['field'] as $key => $field) {
                 if (is_array($params['value'][$key])) {
                     $params['value'][$key] = json_encode($params['value'][$key]);
                 }
 
-                $html .= "load_crline('".$line."','".$field."','".str_replace(array("\r\n","\r","\n"), " ", $params['value'][$key])."','".$params['value_type'][$key]."');";
+                $html .= "load_crline('".$line."','".$field."','".str_replace(array("\r\n","\r","\n"), " ", (string) $params['value'][$key])."','".$params['value_type'][$key]."');";
             }
         }
         if (isset($params['rel'])) {

@@ -64,7 +64,7 @@ class SuiteEditorMozaik implements SuiteEditorInterface
      *
      * @param SuiteEditorSettings $settings
      */
-    public function setup(SuiteEditorSettings $settings = null)
+    public function setup(?SuiteEditorSettings $settings = null)
     {
         $this->settings = $settings;
         require_once('include/SuiteMozaik.php');
@@ -86,7 +86,6 @@ class SuiteEditorMozaik implements SuiteEditorInterface
             $this->settings->elementId,
             $this->settings->width,
             $this->settings->group,
-            $this->settings->tinyMCESetup
         ));
         return $smarty->fetch(get_custom_file_if_exists('include/SuiteEditor/tpls/SuiteEditorMozaik.tpl'));
     }

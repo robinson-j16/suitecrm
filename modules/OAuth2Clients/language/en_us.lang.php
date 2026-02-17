@@ -55,6 +55,7 @@ $mod_strings = [
     'LBL_ALLOWED_GRANT_TYPE' => 'Allowed Grant Type',
     'LBL_DURATION_AMOUNT' => 'Duration amount',
     'LBL_DURATION_UNIT' => 'Duration unit',
+    'LBL_DURATION_VALUE' => 'Duration value',
     'LBL_USER' => 'Associated user',
 
     'LBL_OAUTHTOKENS_SUBPANEL_TITLE' => 'Active OAuth2 Tokens',
@@ -65,6 +66,7 @@ $mod_strings = [
 
     'LNK_OAUTH2_TOKEN_LIST'=> 'List OAuth2 Tokens',
     'LNK_OAUTH2_CLIENT_LIST' => 'List OAuth2 Clients',
+    'LNK_OAUTH2_AUTHCODE_LIST' => 'List OAuth2 Authorization Codes',
 
     'LNK_NEW_OAUTH2_CLIENT' => 'Create OAuth2 Client',
     'LNK_NEW_OAUTH2_PASSWORD_CLIENT' => 'New Password Client',

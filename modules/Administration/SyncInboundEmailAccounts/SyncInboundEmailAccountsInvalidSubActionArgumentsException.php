@@ -51,6 +51,7 @@ if (!defined('sugarEntry') || !sugarEntry) {
  * contains the incorrectly called action-method name
  *
  */
+#[\AllowDynamicProperties]
 class SyncInboundEmailAccountsInvalidSubActionArgumentsException extends Exception
 {
 
@@ -68,7 +69,7 @@ class SyncInboundEmailAccountsInvalidSubActionArgumentsException extends Excepti
      * @param int $code
      * @param Exception|null $previous
      */
-    public function __construct($message = "", $code = 0, \Exception $previous = null)
+    public function __construct($message = "", $code = 0, ?\Exception $previous = null)
     {
         parent::__construct(
             ($message ? $message . " - " : "") .

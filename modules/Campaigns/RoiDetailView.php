@@ -60,7 +60,7 @@ $focus = BeanFactory::newBean('Campaigns');
 $detailView = new DetailView();
 $offset = 0;
 $offset=0;
-if (isset($_REQUEST['offset']) or isset($_REQUEST['record'])) {
+if (isset($_REQUEST['offset']) || isset($_REQUEST['record'])) {
     $result = $detailView->processSugarBean("CAMPAIGN", $focus, $offset);
     if ($result == null) {
         sugar_die($app_strings['ERROR_NO_RECORD']);
@@ -147,9 +147,9 @@ $campaign_id = $focus->id;
             $opp_query1 .= " and deleted=0";
             $camp_result1=$focus->db->query($camp_query1);
             $camp_data1=$focus->db->fetchByAssoc($camp_result1);
-            
-   if (unformat_number($focus->impressions) > 0) {
-       $cost_per_impression= unformat_number($focus->actual_cost)/unformat_number($focus->impressions);
+
+   if ((float)unformat_number($focus->impressions) > 0) {
+       $cost_per_impression= (float)unformat_number($focus->actual_cost)/(float)unformat_number($focus->impressions);
    } else {
        $cost_per_impression = format_number(0);
    }
@@ -158,9 +158,9 @@ $campaign_id = $focus->id;
        $camp_data1['click_thru_link']=0;
    }
    $click_thru_links = $camp_data1['click_thru_link'];
-   
-   if ($click_thru_links >0) {
-       $cost_per_click_thru= unformat_number($focus->actual_cost)/unformat_number($click_thru_links);
+
+   if ((float)unformat_number($click_thru_links) >0) {
+       $cost_per_click_thru= (float)unformat_number($focus->actual_cost)/(float)unformat_number($click_thru_links);
    } else {
        $cost_per_click_thru = format_number(0);
    }
@@ -182,10 +182,9 @@ $campaign_id = $focus->id;
     if (is_admin($current_user) && $_REQUEST['module'] != 'DynamicLayout' && !empty($_SESSION['editinplace'])) {
         $smarty->assign("ADMIN_EDIT", "<a href='index.php?action=index&module=DynamicLayout&from_action=".$_REQUEST['action'] ."&from_module=".$_REQUEST['module'] ."&record=".$_REQUEST['record']. "'>".SugarThemeRegistry::current()->getImage("EditLayout", "border='0' align='bottom'", null, null, '.gif', $mod_strings['LBL_EDIT_LAYOUT'])."</a>");
     }
-    
+    global $xtpl;
     $detailView->processListNavigation($xtpl, "CAMPAIGN", $offset, $focus->is_AuditEnabled());
     // adding custom fields:
-    global $xtpl;
     $xtpl = $smarty;
     require_once('modules/DynamicFields/templates/Files/DetailView.php');
     

@@ -5,6 +5,7 @@ use Api\Core\Config\ApiConfig;
 use Exception;
 use JsonSerializable;
 
+#[\AllowDynamicProperties]
 class ErrorResponse implements JsonSerializable
 {
     /**
@@ -138,7 +139,7 @@ class ErrorResponse implements JsonSerializable
     /**
      * @inheritdoc
      */
-    public function jsonSerialize()
+    public function jsonSerialize(): mixed
     {
         $ret = [
             'errors' => [

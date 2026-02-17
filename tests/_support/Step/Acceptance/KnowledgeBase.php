@@ -2,6 +2,7 @@
 
 namespace Step\Acceptance;
 
+#[\AllowDynamicProperties]
 class KnowledgeBase extends \AcceptanceTester
 {
     /**
@@ -23,7 +24,7 @@ class KnowledgeBase extends \AcceptanceTester
         $I->fillField('#additional_info', $faker->text());
         $I->fillField('#revision', $faker->randomDigit());
 
-        $I->executeJS('tinyMCE.activeEditor.setContent("TinyMCE Content Test");');
+        $I->executeJS('tinymce.activeEditor.setContent("TinyMCE Content Test");');
 
         $I->seeElement('#author');
         $I->seeElement('#approver');

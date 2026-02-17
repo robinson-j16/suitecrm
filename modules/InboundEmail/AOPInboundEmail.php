@@ -1,29 +1,33 @@
 <?php
- /**
+/**
+ * SuiteCRM is a customer relationship management program developed by SuiteCRM Ltd.
+ * Copyright (C) 2011 - 2025 SuiteCRM Ltd.
  *
+ * This program is free software; you can redistribute it and/or modify it under
+ * the terms of the GNU Affero General Public License version 3 as published by the
+ * Free Software Foundation with the addition of the following permission added
+ * to Section 15 as permitted in Section 7(a): FOR ANY PART OF THE COVERED WORK
+ * IN WHICH THE COPYRIGHT IS OWNED BY SUITECRM, SUITECRM DISCLAIMS THE
+ * WARRANTY OF NON INFRINGEMENT OF THIRD PARTY RIGHTS.
  *
- * @package
- * @copyright SalesAgility Ltd http://www.salesagility.com
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more
+ * details.
  *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU AFFERO GENERAL PUBLIC LICENSE as published by
- * the Free Software Foundation; either version 3 of the License, or
- * (at your option) any later version.
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU AFFERO GENERAL PUBLIC LICENSE
- * along with this program; if not, see http://www.gnu.org/licenses
- * or write to the Free Software Foundation,Inc., 51 Franklin Street,
- * Fifth Floor, Boston, MA 02110-1301  USA
- *
- * @author SalesAgility Ltd <support@salesagility.com>
+ * In accordance with Section 7(b) of the GNU Affero General Public License
+ * version 3, these Appropriate Legal Notices must retain the display of the
+ * "Supercharged by SuiteCRM" logo. If the display of the logos is not reasonably
+ * feasible for technical reasons, the Appropriate Legal Notices must display
+ * the words "Supercharged by SuiteCRM".
  */
+
 require_once 'modules/InboundEmail/InboundEmail.php';
 require_once 'include/clean.php';
+#[\AllowDynamicProperties]
 class AOPInboundEmail extends InboundEmail
 {
     public $job_name = 'function::pollMonitoredInboxesAOP';
@@ -41,7 +45,7 @@ class AOPInboundEmail extends InboundEmail
             return $string;
         }
         $matches = array();
-        preg_match('/cid:([[:alnum:]-]*)/', $string, $matches);
+        preg_match('/cid:([[:alnum:]-]*)/', (string) $string, $matches);
         if (!$matches) {
             return $string;
         }
@@ -49,7 +53,7 @@ class AOPInboundEmail extends InboundEmail
         $matches = array_unique($matches);
         foreach ($matches as $match) {
             if (in_array($match, $noteIds)) {
-                $string = str_replace('cid:'.$match, $sugar_config['site_url']."/index.php?entryPoint=download&id={$match}&type=Notes&", $string);
+                $string = str_replace('cid:'.$match, $sugar_config['site_url']."/index.php?entryPoint=download&id={$match}&type=Notes&", (string) $string);
             }
         }
         return $string;
@@ -63,6 +67,8 @@ class AOPInboundEmail extends InboundEmail
         $GLOBALS['log']->debug('In handleCreateCase in AOPInboundEmail');
         $c = BeanFactory::newBean('Cases');
         $this->getCaseIdFromCaseNumber($email->name, $c);
+
+        $to = [];
 
         if (!$this->handleCaseAssignment($email) && $this->isMailBoxTypeCreateCase()) {
             // create a case
@@ -93,7 +99,7 @@ class AOPInboundEmail extends InboundEmail
 
             $GLOBALS['log']->debug('finding related accounts with address ' . $contactAddr);
             if ($accountIds = $this->getRelatedId($contactAddr, 'accounts')) {
-                if (count($accountIds) == 1) {
+                if ((is_countable($accountIds) ? count($accountIds) : 0) == 1) {
                     $c->account_id = $accountIds[0];
 
                     $acct = BeanFactory::newBean('Accounts');
@@ -112,7 +118,7 @@ class AOPInboundEmail extends InboundEmail
                 $c->emails->add($email->id);
             } // if
             if (!empty($contactIds) && $c->load_relationship('contacts')) {
-                if (!$accountIds && count($contactIds) == 1) {
+                if (!$accountIds && (is_countable($contactIds) ? count($contactIds) : 0) == 1) {
                     $contact = BeanFactory::getBean('Contacts', $contactIds[0]);
                     if ($contact->load_relationship('accounts')) {
                         $acct = $contact->accounts->get();
@@ -142,12 +148,12 @@ class AOPInboundEmail extends InboundEmail
             $email->parent_id = $c->id;
             // assign the email to the case owner
             $email->assigned_user_id = $c->assigned_user_id;
-            $email->name = str_replace('%1', $c->case_number, $c->getEmailSubjectMacro()) . " ". $email->name;
+            $email->name = str_replace('%1', $c->case_number, (string) $c->getEmailSubjectMacro()) . " ". $email->name;
             $email->save();
             $GLOBALS['log']->debug('InboundEmail created one case with number: '.$c->case_number);
             $createCaseTemplateId = $this->get_stored_options('create_case_email_template', "");
             if (!empty($this->stored_options)) {
-                $storedOptions = unserialize(base64_decode($this->stored_options));
+                $storedOptions = unserialize(base64_decode($this->stored_options), ['allowed_classes' => false]);
             }
             if (!empty($createCaseTemplateId)) {
                 $fromName = "";
@@ -199,7 +205,7 @@ class AOPInboundEmail extends InboundEmail
 
                 $email = $email->et->handleReplyType($email, "reply");
                 $ret = $email->et->displayComposeEmail($email);
-                $ret['description'] = empty($email->description_html) ?  str_replace("\n", "\n<BR/>", $email->description) : $email->description_html;
+                $ret['description'] = empty($email->description_html) ?  str_replace("\n", "\n<BR/>", (string) $email->description) : $email->description_html;
 
                 $reply = BeanFactory::newBean('Emails');
                 $reply->type				= 'out';

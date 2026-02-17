@@ -44,6 +44,7 @@
 
     require_once('modules/Calendar/Calendar.php');
 
+    #[\AllowDynamicProperties]
     class vCal extends SugarBean
     {
 
@@ -68,10 +69,10 @@
         // This is used to retrieve related fields from form posts.
         public $additional_column_fields = array();
 
-        const UTC_FORMAT = 'Ymd\THi00\Z';
-        const EOL = "\r\n";
-        const TAB = "\t";
-        const CHARSPERLINE = 75;
+        public const UTC_FORMAT = 'Ymd\THi00\Z';
+        public const EOL = "\r\n";
+        public const TAB = "\t";
+        public const CHARSPERLINE = 75;
 
         public function __construct()
         {
@@ -165,7 +166,7 @@
             $ical_array = array();
             $ical_array[] = array("BEGIN", "VCALENDAR");
             $ical_array[] = array("VERSION", "2.0");
-            $ical_array[] = array("PRODID", "-//SugarCRM//SugarCRM Calendar//EN");
+            $ical_array[] = array("PRODID", "-//SuiteCRM//SuiteCRM Calendar//EN");
             $ical_array[] = array("BEGIN", "VFREEBUSY");
 
             $name = $locale->getLocaleFormattedName($user_focus->first_name, $user_focus->last_name);
@@ -279,7 +280,7 @@
          */
         public static function create_ical_array_from_string($ical_string)
         {
-            $ical_string = preg_replace("/\r\n\s+/", "", $ical_string);
+            $ical_string = preg_replace("/\r\n\s+/", "", (string) $ical_string);
             $lines = preg_split("/\r?\n/", $ical_string);
             $ical_array = array();
 
@@ -343,26 +344,32 @@
         /**
          * get ics file content for meeting invite email
          */
-        public static function get_ical_event(SugarBean $bean, User $user)
+        public static function get_ical_event(SugarBean $bean, User $user, $notify_user = null)
         {
             global $timedate;
             $ical_array = array();
 
             $ical_array[] = array("BEGIN", "VCALENDAR");
             $ical_array[] = array("VERSION", "2.0");
-            $ical_array[] = array("PRODID", "-//SugarCRM//SugarCRM Calendar//EN");
+            $ical_array[] = array("METHOD", "REQUEST");
+            $ical_array[] = array("PRODID", "-//SuiteCRM//SuiteCRM Calendar//EN");
             $ical_array[] = array("BEGIN", "VEVENT");
             $ical_array[] = array("UID", $bean->id);
             $ical_array[] = array("ORGANIZER;CN=" . $user->name, "mailto:" . $user->email1);
             $ical_array[] = array("DTSTART", $timedate->fromDb($bean->date_start)->format(self::UTC_FORMAT));
             $ical_array[] = array("DTEND", $timedate->fromDb($bean->date_end)->format(self::UTC_FORMAT));
 
+            if (!empty($notify_user)) {
+                $notifyUserEmail = $notify_user->email1 ?? '';
+                $ical_array[] = array("ATTENDEE;CN=" . $notifyUserEmail . ";ROLE=REQ-PARTICIPANT;RSVP=TRUE", "mailto:" . $notifyUserEmail);
+            }
+
             $ical_array[] = array(
                 "DTSTAMP",
                 $GLOBALS['timedate']->getNow(false)->format(self::UTC_FORMAT)
             );
             $ical_array[] = array("SUMMARY", $bean->name);
-            $ical_array[] = array("LOCATION", $bean->location);
+            $ical_array[] = array("LOCATION", $bean->location ?? '');
 
             $descPrepend = empty($bean->join_url) ? "" : $bean->join_url . self::EOL . self::EOL;
             $ical_array[] = array("DESCRIPTION", $descPrepend . $bean->description);

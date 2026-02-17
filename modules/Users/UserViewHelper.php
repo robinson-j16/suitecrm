@@ -46,6 +46,7 @@ if (!defined('sugarEntry') || !sugarEntry) {
  * This helper handles the rest of the fields for the Users Edit and Detail views.
  * There are a lot of fields on those views that do not map directly to being used on the metadata based UI, so they are handled here.
  */
+#[\AllowDynamicProperties]
 class UserViewHelper
 {
 
@@ -354,7 +355,7 @@ class UserViewHelper
         } else {
             $this->ss->assign("THEMES", get_select_options_with_id(SugarThemeRegistry::availableThemes(), $GLOBALS['sugar_config']['default_theme']));
         }
-        $this->ss->assign("SHOW_THEMES", count(SugarThemeRegistry::availableThemes()) > 1);
+        $this->ss->assign("SHOW_THEMES", (is_countable(SugarThemeRegistry::availableThemes()) ? count(SugarThemeRegistry::availableThemes()) : 0) > 1);
         $this->ss->assign("USER_THEME_COLOR", $this->bean->getPreference('user_theme_color'));
         $this->ss->assign("USER_THEME_FONT", $this->bean->getPreference('user_theme_font'));
         $this->ss->assign("USER_THEME", $user_theme);
@@ -398,14 +399,21 @@ class UserViewHelper
 
     protected function setupAdvancedTabUserSettings()
     {
-        global $current_user, $locale, $app_strings, $app_list_strings, $sugar_config;
+        global $current_user, $locale, $app_strings, $app_list_strings, $sugar_config, $current_language;
         // This is for the "Advanced" tab, it's not controlled by the metadata UI so we have to do more for it.
+
+        $admin = BeanFactory::newBean('Administration');
+        $admin->retrieveSettings();
 
         $this->ss->assign('EXPORT_DELIMITER', $this->bean->getPreference('export_delimiter'));
 
         if ($this->bean->receive_notifications || (!isset($this->bean->id) && $admin->settings['notify_send_by_default'])) {
             $this->ss->assign("RECEIVE_NOTIFICATIONS", "checked");
         }
+        $currentLanguage = $this->bean->getPreference('language') ?? $current_language;
+        $languages = get_languages();
+        $languageOptions = get_select_options_with_id($languages, $currentLanguage);
+        $this->ss->assign('LanguageOptions', $languageOptions);
 
         //jc:12293 - modifying to use the accessor method which will translate the
         //available character sets using the translation files
@@ -479,58 +487,6 @@ class UserViewHelper
         $this->ss->assign("CALENDAR_ICAL_URL", $ical_url);
 
         $this->ss->assign("SETTINGS_URL", $sugar_config['site_url']);
-
-        // Set Google Auth variables
-        $this->setGoogleAuthVariables($sugar_config);
-    }
-
-    /**
-     * Set Google Auth variables
-     *
-     * @param array $sugar_config
-     */
-    protected function setGoogleAuthVariables($sugar_config)
-    {
-        $this->ss->assign("GOOGLE_API_TOKEN_ENABLE_NEW", "none"); // Hide new token button by default
-        $this->ss->assign("GOOGLE_API_TOKEN_NEW_URL", $sugar_config['site_url'] . "/index.php?entryPoint=saveGoogleApiKey&getnew");
-        $this->ss->assign("GOOGLE_API_TOKEN_BTN", "Disabled");
-        if (isset($sugar_config['google_auth_json']) && !empty($sugar_config['google_auth_json'])) {
-            $json = base64_decode($sugar_config['google_auth_json']);
-            if (!$config = json_decode($json, true)) { // Check if the JSON is valid
-                $this->ss->assign("GOOGLE_API_TOKEN", "INVALID AUTH KEY");
-                $this->ss->assign("GOOGLE_API_TOKEN_COLOR", "red");
-                $this->ss->assign("GOOGLE_API_TOKEN_ENABLE_NEW", "inline");
-            } else {
-                $this->setGoogleAuthAccessToken();
-            }
-        } else {
-            $this->ss->assign("GOOGLE_API_TOKEN", "DISABLED");
-            $this->ss->assign("GOOGLE_API_TOKEN_COLOR", "black");
-            $this->ss->assign("HIDE_IF_GAUTH_UNCONFIGURED", "none");
-        }
-
-        if ($this->bean->getPreference('syncGCal', 'GoogleSync') == '1') {
-            $this->ss->assign('GSYNC_CAL', ' checked');
-        }
-    }
-
-    /**
-     * set Google Auth Access Token in template
-     */
-    protected function setGoogleAuthAccessToken()
-    {
-        $accessToken = json_decode(base64_decode($this->bean->getPreference('GoogleApiToken', 'GoogleSync')));
-        if (!empty($this->bean->getPreference('GoogleApiToken', 'GoogleSync')) && $accessToken = json_decode(base64_decode($this->bean->getPreference('GoogleApiToken', 'GoogleSync')))) { // Check if the user has a token
-            $this->ss->assign("GOOGLE_API_TOKEN", "CONFIGURED");
-            $this->ss->assign("GOOGLE_API_TOKEN_COLOR", "green");
-            $this->ss->assign("GOOGLE_API_TOKEN_BTN", "Reauthorize");
-            $this->ss->assign("GOOGLE_API_TOKEN_ENABLE_NEW", "inline");
-        } else {
-            $this->ss->assign("GOOGLE_API_TOKEN", "UNCONFIGURED");
-            $this->ss->assign("GOOGLE_API_TOKEN_COLOR", "black");
-            $this->ss->assign("GOOGLE_API_TOKEN_ENABLE_NEW", "inline");
-            $this->ss->assign("GOOGLE_API_TOKEN_BTN", "Authorize");
-        }
     }
 
     protected function setupAdvancedTabTeamSettings()
@@ -562,6 +518,8 @@ class UserViewHelper
     protected function setupAdvancedTabNavSettings()
     {
         global $app_list_strings;
+
+        $ss = null;
 
         // Grouped tabs?
         $useGroupTabs = $this->bean->getPreference('navigation_paradigm');
@@ -663,9 +621,12 @@ class UserViewHelper
             $this->bean->setPreference('timezone', $userTZ);
         }
 
-        if (!$this->bean->getPreference('ut')) {
+        $ut = $this->bean->getPreference('ut');
+
+        if ($ut === '0') {
             $this->ss->assign('PROMPTTZ', ' checked');
         }
+
         $this->ss->assign('TIMEZONE_CURRENT', $userTZ);
         $this->ss->assign('TIMEZONEOPTIONS', TimeDate::getTimezoneList());
         $this->ss->assign("TIMEZONE", TimeDate::tzName($userTZ));

@@ -61,6 +61,7 @@ use SuiteCRM\Search\Index\IndexingStatisticsTrait;
 /**
  * Class ElasticSearchIndexer takes care of creating a search index for the database.
  */
+#[\AllowDynamicProperties]
 class ElasticSearchIndexer extends AbstractIndexer
 {
     use IndexingStatisticsTrait;
@@ -81,7 +82,7 @@ class ElasticSearchIndexer extends AbstractIndexer
      *
      * @param Client|null $client
      */
-    public function __construct(Client $client = null)
+    public function __construct(?Client $client = null)
     {
         parent::__construct();
 
@@ -91,7 +92,7 @@ class ElasticSearchIndexer extends AbstractIndexer
     /**
      * Returns whether the Elasticsearch is enabled by user configuration or not.
      *
-     * @return bool
+     * @return bool|null
      */
     public static function isEnabled(): ?bool
     {
@@ -183,7 +184,7 @@ class ElasticSearchIndexer extends AbstractIndexer
      * @param string $index name of the index
      * @param array|null $body options of the index
      */
-    public function createIndex(string $index, array $body = null): void
+    public function createIndex(string $index, ?array $body = null): void
     {
         $params = ['index' => $index];
 
@@ -369,7 +370,7 @@ class ElasticSearchIndexer extends AbstractIndexer
      *
      * @param string $module name of the module
      *
-     * @return array an associative array with the metadata
+     * @return mixed[]|null an associative array with the metadata
      */
     public function getMeta(string $module): ?array
     {
@@ -381,7 +382,7 @@ class ElasticSearchIndexer extends AbstractIndexer
             return null;
         }
 
-        return $results[$lowercaseModule]['mappings']['_meta'];
+        return $results[$lowercaseModule]['mappings']['_meta'] ?? array();
     }
 
     /**
@@ -500,16 +501,18 @@ class ElasticSearchIndexer extends AbstractIndexer
             // logs the errors
             foreach ($responses['items'] as $item) {
                 $action = array_keys($item)[0];
-                $type = $item[$action]['error']['type'];
-                $reason = $item[$action]['error']['reason'];
-                $this->logger->error("[$action] [$type] $reason");
+                if(isset($item[$action]['error'])) {
+                    $type = $item[$action]['error']['type'];
+                    $reason = $item[$action]['error']['reason'];
+                    $this->logger->error("[$action] [$type] $reason");
+                    
+                    if ($action === 'index') {
+                        $this->indexedRecordsCount--;
+                    }
 
-                if ($action === 'index') {
-                    $this->indexedRecordsCount--;
-                }
-
-                if ($action === 'delete') {
-                    $this->removedRecordsCount--;
+                    if ($action === 'delete') {
+                        $this->removedRecordsCount--;
+                    }
                 }
             }
         }

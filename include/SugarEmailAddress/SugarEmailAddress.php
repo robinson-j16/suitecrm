@@ -45,7 +45,7 @@ if (!defined('sugarEntry') || !sugarEntry) {
 
 require_once("include/JSON.php");
 
-
+#[\AllowDynamicProperties]
 class SugarEmailAddress extends SugarBean
 {
     const ERR_INVALID_REQUEST_NO_USER_PROFILE_PAGE_SAVE_ACTION = 1;
@@ -466,7 +466,7 @@ class SugarEmailAddress extends SugarBean
                     email_address = '$_address', 
                     email_address_caps = '$_addressCaps' 
                   WHERE 
-                    id = '{$_id}' AND
+                    id = {$_id} AND
                     deleted = 0";
             $result = $db->query($query);
             if (!$result) {
@@ -549,6 +549,15 @@ class SugarEmailAddress extends SugarBean
         $module_dir = $this->getCorrectedModule($bean->module_dir);
         $this->addresses = $this->getAddressesByGUID($bean->id, $module_dir);
         $this->populateLegacyFields($bean);
+
+        if (empty($bean->fetched_row)){
+            return;
+        }
+
+        if ($bean->fetched_row === false) {
+            $bean->fetched_row = [];
+        }
+
         if (isset($bean->email1) && !isset($bean->fetched_row['email1'])) {
             $bean->fetched_row['email1'] = $bean->email1;
         }
@@ -1165,6 +1174,10 @@ class SugarEmailAddress extends SugarBean
 
     public function splitEmailAddress($addr)
     {
+        if ($addr === null) {
+            $addr = '';
+        }
+
         $email = $this->_cleanAddress($addr);
         if (!preg_match($this->regex, $email)) {
             $email = ''; // remove bad email addr

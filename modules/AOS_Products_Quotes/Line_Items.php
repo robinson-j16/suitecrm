@@ -1,25 +1,28 @@
 <?php
 /**
- * Advanced OpenSales, Advanced, robust set of sales modules.
- * @package Advanced OpenSales for SugarCRM
- * @copyright SalesAgility Ltd http://www.salesagility.com
+ * SuiteCRM is a customer relationship management program developed by SuiteCRM Ltd.
+ * Copyright (C) 2011 - 2025 SuiteCRM Ltd.
  *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU AFFERO GENERAL PUBLIC LICENSE as published by
- * the Free Software Foundation; either version 3 of the License, or
- * (at your option) any later version.
+ * This program is free software; you can redistribute it and/or modify it under
+ * the terms of the GNU Affero General Public License version 3 as published by the
+ * Free Software Foundation with the addition of the following permission added
+ * to Section 15 as permitted in Section 7(a): FOR ANY PART OF THE COVERED WORK
+ * IN WHICH THE COPYRIGHT IS OWNED BY SUITECRM, SUITECRM DISCLAIMS THE
+ * WARRANTY OF NON INFRINGEMENT OF THIRD PARTY RIGHTS.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more
+ * details.
  *
- * You should have received a copy of the GNU AFFERO GENERAL PUBLIC LICENSE
- * along with this program; if not, see http://www.gnu.org/licenses
- * or write to the Free Software Foundation,Inc., 51 Franklin Street,
- * Fifth Floor, Boston, MA 02110-1301  USA
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
- * @author SalesAgility <info@salesagility.com>
+ * In accordance with Section 7(b) of the GNU Affero General Public License
+ * version 3, these Appropriate Legal Notices must retain the display of the
+ * "Supercharged by SuiteCRM" logo. If the display of the logos is not reasonably
+ * feasible for technical reasons, the Appropriate Legal Notices must display
+ * the words "Supercharged by SuiteCRM".
  */
 
 function display_lines($focus, $field, $value, $view)
@@ -176,11 +179,7 @@ function display_lines($focus, $field, $value, $view)
                 $product .= "<td class='tabDetailViewDF' style='text-align: right; padding:2px;'>".get_discount_string($line_item->discount, $line_item->product_discount, $params, $locale, $sep)."</td>";
 
                 $product .= "<td class='tabDetailViewDF' style='text-align: right; padding:2px;'>".currency_format_number($line_item->product_unit_price, $params)."</td>";
-                if ($locale->getPrecision()) {
-                    $product .= "<td class='tabDetailViewDF' style='text-align: right; padding:2px;'>".rtrim(rtrim(format_number($line_item->vat), '0'), $sep[1])."%</td>";
-                } else {
-                    $product .= "<td class='tabDetailViewDF' style='text-align: right; padding:2px;'>".format_number($line_item->vat)."%</td>";
-                }
+                $product .= "<td class='tabDetailViewDF' style='text-align: right; padding:2px;'>".display_tax_detail_view($locale, $line_item->vat, $sep)."</td>";
                 $product .= "<td class='tabDetailViewDF' style='text-align: right; padding:2px;'>".currency_format_number($line_item->vat_amt, $params)."</td>";
                 $product .= "<td class='tabDetailViewDF' style='text-align: right; padding:2px;'>".currency_format_number($line_item->product_total_price, $params)."</td>";
                 $product .= "</tr>";
@@ -188,7 +187,7 @@ function display_lines($focus, $field, $value, $view)
                 if ($serviceCount == 0) {
                     $service .= "<tr>";
                     $service .= "<td width='5%' class='tabDetailViewDL' style='text-align: left;padding:2px;' scope='row'>&nbsp;</td>";
-                    $service .= "<td width='46%' class='dataLabel' style='text-align: left;padding:2px;' colspan='2' scope='row'>".$mod_strings['LBL_SERVICE_NAME']."</td>";
+                    $service .= "<td width='22%' class='dataLabel' style='text-align: left;padding:2px;' colspan='2' scope='row'>".$mod_strings['LBL_SERVICE_NAME']."</td>";
                     $service .= "<td width='12%' class='dataLabel' style='text-align: right;padding:2px;' scope='row'>".$mod_strings['LBL_SERVICE_LIST_PRICE']."</td>";
                     $service .= "<td width='12%' class='dataLabel' style='text-align: right;padding:2px;' scope='row'>".$mod_strings['LBL_SERVICE_DISCOUNT']."</td>";
                     $service .= "<td width='12%' class='dataLabel' style='text-align: right;padding:2px;' scope='row'>".$mod_strings['LBL_SERVICE_PRICE']."</td>";
@@ -204,10 +203,8 @@ function display_lines($focus, $field, $value, $view)
                 $service .= "<td class='tabDetailViewDF' style='text-align: right; padding:2px;'>".currency_format_number($line_item->product_list_price, $params)."</td>";
 
                 $service .= "<td class='tabDetailViewDF' style='text-align: right; padding:2px;'>".get_discount_string($line_item->discount, $line_item->product_discount, $params, $locale, $sep)."</td>";
-
-
                 $service .= "<td class='tabDetailViewDF' style='text-align: right; padding:2px;'>".currency_format_number($line_item->product_unit_price, $params)."</td>";
-                $service .= "<td class='tabDetailViewDF' style='text-align: right; padding:2px;'>".rtrim(rtrim(format_number($line_item->vat), '0'), $sep[1])."%</td>";
+                $service .= "<td class='tabDetailViewDF' style='text-align: right; padding:2px;'>".display_tax_detail_view($locale, $line_item->vat, $sep)."</td>";
                 $service .= "<td class='tabDetailViewDF' style='text-align: right; padding:2px;'>".currency_format_number($line_item->vat_amt, $params)."</td>";
                 $service .= "<td class='tabDetailViewDF' style='text-align: right; padding:2px;'>".currency_format_number($line_item->product_total_price, $params)."</td>";
                 $service .= "</tr>";
@@ -227,7 +224,7 @@ function display_lines($focus, $field, $value, $view)
 //will also be stripped off) The custom decimal separator is passed in to the function from the locale settings
 function stripDecimalPointsAndTrailingZeroes($inputString, $decimalSeparator)
 {
-    return preg_replace('/'.preg_quote($decimalSeparator).'[0]+$/', '', $inputString);
+    return preg_replace('/'.preg_quote((string) $decimalSeparator).'[0]+$/', '', (string) $inputString);
 }
 
 function get_discount_string($type, $amount, $params, $locale, $sep)
@@ -258,4 +255,24 @@ function display_shipping_vat($focus, $field, $value, $view)
         return $html;
     }
     return format_number($value);
+}
+
+/**
+ * Returns formatted value for the tax field;
+ * @param $locale
+ * @param $value
+ * @param $sep
+ * @return string
+ */
+function display_tax_detail_view($locale, $value, $sep): string
+{
+    global $app_strings;
+
+    if ($locale->getPrecision()) {
+        $value = rtrim(rtrim(format_number($value), '0'), $sep[1]) . $app_strings['LBL_PERCENTAGE_SYMBOL'];
+    } else {
+        $value = format_number($value) . $app_strings['LBL_PERCENTAGE_SYMBOL'];
+    }
+
+    return $value;
 }

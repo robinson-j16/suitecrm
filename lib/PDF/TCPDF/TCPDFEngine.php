@@ -49,6 +49,7 @@ use SuiteCRM\PDF\PDFEngine;
  * Class TFPDFEngine
  * @package SuiteCRM\PDF\TCPDF
  */
+#[\AllowDynamicProperties]
 class TCPDFEngine extends PDFEngine
 {
     /**
@@ -80,7 +81,7 @@ class TCPDFEngine extends PDFEngine
      * TFPDFEngine constructor.
      * @param SuiteTCPDF|null $pdf
      */
-    public function __construct(SuiteTCPDF $pdf = null)
+    public function __construct(?SuiteTCPDF $pdf = null)
     {
         $this->pdf = $pdf ?? new SuiteTCPDF();
         
@@ -195,6 +196,10 @@ class TCPDFEngine extends PDFEngine
         $this->pdf->setFooterMargin($configOptions['margin_footer']);
         $this->pdf->SetAutoPageBreak(true, $configOptions['margin_bottom']);
         $this->pdf->setImageScale($configOptions['image_scale']);
+        
         $this->pdf->SetFont($configOptions['default_font'], '', $configOptions['default_font_size']);
+        $this->pdf->setHeaderFont([$configOptions['default_font'], '', $configOptions['default_font_size']]);
+        $this->pdf->setFooterFont([$configOptions['default_font'], '', $configOptions['default_font_size']]);
+
     }
 }

@@ -42,6 +42,7 @@ if (!defined('sugarEntry') || !sugarEntry) {
  */
 
 
+#[\AllowDynamicProperties]
 class TabController
 {
     public $required_modules = array('Home');
@@ -77,8 +78,7 @@ class TabController
                 $trimmed_tabs = trim($tabs);
                 //make sure serialized string is not empty
                 if (!empty($trimmed_tabs)) {
-                    $tabs = base64_decode($tabs);
-                    $tabs = unserialize($tabs);
+                    $tabs = unserialize(base64_decode($tabs), ['allowed_classes' => false]);
                     //Ensure modules saved in the prefences exist.
                     foreach ($tabs as $id => $tab) {
                         if (!in_array($tab, $moduleList)) {

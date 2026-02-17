@@ -171,42 +171,43 @@ class TemplateHandler
         );
         $contents = $this->ss->fetch($tpl);
         // Insert validation and quick search stuff here
-        if ($view === 'EditView' || $ajaxSave || $view === 'ConvertLead' || strpos($view, 'QuickCreate')) {
-            global $dictionary, $beanList, $app_strings, $mod_strings;
-            $mod = $beanList[$module];
+        if ($view === 'EditView' || $ajaxSave || $view === 'ConvertLead' || $view === 'ComposeView' || strpos($view, 'QuickCreate')) {
+            global $dictionary, $app_strings, $mod_strings;
 
-            if ($mod === 'aCase') {
-                $mod = 'Case';
-            }
+            $mod = BeanFactory::getObjectName($module);
 
             $defs = isset($dictionary[$mod]['fields']) ? $dictionary[$mod]['fields'] : [];
             $defs2 = array();
             //Retrieve all panel field definitions with displayParams Array field set
             $panelFields = array();
 
-            foreach ($metaDataDefs['panels'] as $panel) {
-                foreach ($panel as $row) {
-                    foreach ($row as $entry) {
-                        if (empty($entry)) {
-                            continue;
-                        }
+            if (is_array($metaDataDefs['panels'])) {
+                foreach ($metaDataDefs['panels'] as $panel) {
+                    foreach ($panel as $row) {
+                        foreach ($row as $entry) {
+                            if (empty($entry)) {
+                                continue;
+                            }
 
-                        if (is_array($entry) &&
-                            isset($entry['name']) &&
-                            isset($entry['displayParams']['required']) &&
-                            $entry['displayParams']['required']
-                        ) {
-                            $panelFields[$entry['name']] = $entry;
-                        }
+                            if (is_array($entry) &&
+                                isset($entry['name']) &&
+                                isset($entry['displayParams']['required']) &&
+                                $entry['displayParams']['required']
+                            ) {
+                                $panelFields[$entry['name']] = $entry;
+                            }
 
-                        if (is_array($entry)) {
-                            $defs2[$entry['name']] = $entry;
-                        } else {
-                            $defs2[$entry] = array('name' => $entry);
-                        }
+                            if (is_array($entry)) {
+                                if (isset($entry['name'])) {
+                                    $defs2[$entry['name']] = $entry;
+                                }
+                            } else {
+                                $defs2[$entry] = array('name' => $entry);
+                            }
+                        } //foreach
                     } //foreach
                 } //foreach
-            } //foreach
+            }
 
             foreach ($panelFields as $field => $value) {
                 $nameList = array();
@@ -524,7 +525,7 @@ class TemplateHandler
         } else {
             //Loop through the Meta-Data fields to see which ones need quick search support
             foreach ($defs2 as $f) {
-                if (!isset($defs[$f['name']])) {
+                if (!isset($f['name']) || !isset($defs[$f['name']])) {
                     continue;
                 }
 

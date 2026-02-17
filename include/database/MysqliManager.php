@@ -123,6 +123,7 @@ class MysqliManager extends MysqlManager
      */
     public function query($sql, $dieOnError = false, $msg = '', $suppress = false, $keepResult = false)
     {
+        $result = null;
         if (is_array($sql)) {
             return $this->queryArray($sql, $dieOnError, $msg, $suppress);
         }
@@ -136,7 +137,12 @@ class MysqliManager extends MysqlManager
         $this->lastsql = $sql;
         if (!empty($sql)) {
             if ($this->database instanceof mysqli) {
-                $result = $suppress ? @mysqli_query($this->database, $sql) : mysqli_query($this->database, $sql);
+                $result = false;
+                try {
+                    $result = mysqli_query($this->database, $sql);
+                } catch (Exception $e) {
+                }
+
                 if ($result === false && !$suppress) {
                     if (inDeveloperMode()) {
                         LoggerManager::getLogger()->debug('Mysqli_query failed, error was: ' . $this->lastDbError() . ', query was: ');
@@ -287,13 +293,17 @@ class MysqliManager extends MysqlManager
      */
     public function quote($string)
     {
-        return mysqli_real_escape_string($this->getDatabase(), $this->quoteInternal($string));
+        try {
+            return mysqli_real_escape_string($this->getDatabase(), (string) $this->quoteInternal($string));
+        } catch (Throwable $e) {
+            return mysqli_real_escape_string($this->getDatabase(), "");
+        }
     }
 
     /**
      * @see DBManager::connect()
      */
-    public function connect(array $configOptions = null, $dieOnError = false)
+    public function connect(?array $configOptions = null, $dieOnError = false)
     {
         global $sugar_config;
 
@@ -313,13 +323,17 @@ class MysqliManager extends MysqlManager
                 $dbport = substr($configOptions['db_host_name'], $pos + 1);
             }
 
-            $this->database = @mysqli_connect(
-                $dbhost,
-                $configOptions['db_user_name'],
-                $configOptions['db_password'],
-                isset($configOptions['db_name']) ? $configOptions['db_name'] : '',
-                $dbport
-            );
+            try {
+                $this->database = @mysqli_connect(
+                    $dbhost,
+                    $configOptions['db_user_name'],
+                    $configOptions['db_password'],
+                    isset($configOptions['db_name']) ? $configOptions['db_name'] : '',
+                    $dbport
+                );
+            } catch (mysqli_sql_exception $e) {
+                $this->database = false;
+            }
             if (empty($this->database)) {
                 $GLOBALS['log']->fatal("Could not connect to DB server " . $dbhost . " as " . $configOptions['db_user_name'] . ". port " . $dbport . ": " . mysqli_connect_error());
                 if ($dieOnError) {
@@ -426,5 +440,22 @@ class MysqliManager extends MysqlManager
     public function valid()
     {
         return function_exists("mysqli_connect") && empty($GLOBALS['sugar_config']['mysqli_disabled']);
+    }
+
+    public function compareVarDefs($fielddef1, $fielddef2, $ignoreName = false)
+    {
+        /**
+         * Int lengths are ignored in MySQL versions >= 8.0.19 so we need to ignore when comparing vardefs.
+         */
+        if($fielddef1['type'] == 'int') {
+            $db_version = $this->version();
+            if (!empty($db_version)
+                && version_compare($db_version, '8.0.19') >= 0
+                && strpos($db_version, "MariaDB") === false
+            ) {
+                unset($fielddef2['len']);
+            }
+        }
+        return parent::compareVarDefs($fielddef1, $fielddef2, $ignoreName);
     }
 }

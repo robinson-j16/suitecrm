@@ -46,6 +46,7 @@ if (!defined('sugarEntry') || !sugarEntry) {
 /**
  * Class EntryPointConfirmOptInHandler
  */
+#[\AllowDynamicProperties]
 class EntryPointConfirmOptInHandler
 {
 
@@ -112,7 +113,7 @@ class EntryPointConfirmOptInHandler
         }
 
         $module = $post['module'];
-        $uids = explode(',', $post['uid']);
+        $uids = explode(',', $post['uid'] ?? '');
         $confirmedOptInEmailsSent = 0;
         $errors = 0;
         $warnings = 0;

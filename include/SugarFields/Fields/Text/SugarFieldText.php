@@ -39,7 +39,9 @@
  */
 
 require_once('include/SugarFields/Fields/Base/SugarFieldBase.php');
-require_once 'include/clean.php';
+require_once('include/clean.php');
+require_once('include/SugarTinyMCE.php');
+
 class SugarFieldText extends SugarFieldBase
 {
     public function getDetailViewSmarty($parentFieldArray, $vardef, $displayParams, $tabindex)
@@ -48,7 +50,9 @@ class SugarFieldText extends SugarFieldBase
             $displayParams['nl2br'] = true;
         }
 
-        if (!isset($displayParams['htmlescape']) && $vardef['editor'] != "html") {
+        $editor = $vardef['editor'] ?? '';
+
+        if (!isset($displayParams['htmlescape']) && $editor != "html") {
             $displayParams['htmlescape'] = true;
         }
 
@@ -91,21 +95,45 @@ class SugarFieldText extends SugarFieldBase
 
     public function setup($parentFieldArray, $vardef, $displayParams, $tabindex, $twopass = true)
     {
-        parent::setup($parentFieldArray, $vardef, $displayParams, $tabindex, $twopass);
-        $editor = "";
+        global $log;
 
-        if (isset($vardef['editor']) && $vardef['editor'] == "html") {
+        parent::setup($parentFieldArray, $vardef, $displayParams, $tabindex, $twopass);
+        $initiate = "";
+
+        if (isset($vardef['editor']) && $vardef['editor'] === "html") {
             if (!isset($displayParams['htmlescape'])) {
                 $displayParams['htmlescape'] = false;
             }
 
-            if ($_REQUEST['action'] == "EditView") {
-                require_once(__DIR__ . "/../../../../include/SugarTinyMCE.php");
-                $tiny = new SugarTinyMCE();
-                $editor = $tiny->getInstance($vardef['name'], 'email_compose_light');
+            if (isset($_REQUEST['action']) && $_REQUEST['action'] === "EditView") {
+                $form_name = $displayParams['formName'] ?? '';
+                $vardefName = $vardef['name'];
+
+                if (!empty($this->ss->_tpl_vars['displayParams']['formName'])) {
+                    $form_name = $this->ss->_tpl_vars['displayParams']['formName'];
+                }
+
+                try {
+                    $tiny = new SugarTinyMCE();
+                    $tinyConfigJs = $tiny->getConfig();
+
+                    $selector = "";
+                    if ($form_name !== '') {
+                        $selector .= "#$form_name ";
+                    }
+                    $selector .= "#$vardefName";
+
+                    $initiate = '<script type="text/javascript">';
+                    $initiate .= $tinyConfigJs;
+                    $initiate .= "tinyConfig.selector = '$selector';";
+                    $initiate .= 'tinymce.init(tinyConfig);';
+                    $initiate .= '</script>';
+                } catch (Throwable $e) {
+                    $log?->error("[SugarFieldText][setup][tinymce_init_failed] Failed to initialize TinyMCE: " . $e->getMessage());
+                }
             }
         }
 
-        $this->ss->assign("tinymce", $editor);
+        $this->ss->assign("tinymce", $initiate);
     }
 }

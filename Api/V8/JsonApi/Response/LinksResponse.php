@@ -1,6 +1,7 @@
 <?php
 namespace Api\V8\JsonApi\Response;
 
+#[\AllowDynamicProperties]
 class LinksResponse implements \JsonSerializable
 {
     /**
@@ -48,7 +49,7 @@ class LinksResponse implements \JsonSerializable
     /**
      * @inheritdoc
      */
-    public function jsonSerialize()
+    public function jsonSerialize(): mixed
     {
         $response = [
             'self' => $this->getSelf(),

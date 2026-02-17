@@ -51,11 +51,17 @@ function get_body($ss, $vardef)
     $edValue = '';
     if (!empty($vardef['default_value'])) {
         $edValue = $vardef['default_value'];
-        $edValue = str_replace(array("\r\n", "\n"), " ", $edValue);
+        $edValue = str_replace(array("\r\n", "\n"), " ", (string) $edValue);
     }
     $ss->assign('HTML_EDITOR', $edValue);
     $ss->assign('disableInlineEdit', 1);
     $ss->assign('preSave', 'document.popup_form.presave();');
+
+    require_once('include/SugarTinyMCE.php');
+    $tiny = new SugarTinyMCE();
+    $tinConfig = $tiny->getConfig();
+    $ss->assign('tinyConfig', $tinConfig);
+
     ///////////////////////////////////
     return $ss->fetch('modules/DynamicFields/templates/Fields/Forms/html.tpl');
 }

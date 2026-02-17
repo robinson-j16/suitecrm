@@ -55,6 +55,7 @@ use SuiteCRM\Exception\NotFoundException;
  * Class MetaService
  * @package Api\V8\Service
  */
+#[\AllowDynamicProperties]
 class MetaService
 {
     /**
@@ -75,8 +76,9 @@ class MetaService
         'default',
         'len',
         'precision',
-        'comments',
+        'comment',
         'required',
+        'vname'
     ];
 
     /**

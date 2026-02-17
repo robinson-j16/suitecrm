@@ -95,6 +95,11 @@ class MySugar
 
             $dashlets = $current_user->getPreference('dashlets', $this->type);
 
+            if (!empty($_POST['type_module']) && stripos($_POST['type_module'], 'phar://') !== false) {
+                LoggerManager::getLogger()->security('MySugar:addDashlet unsecure type_module received: ' . $_POST['type_module']);
+                throw new RuntimeException('Invalid type_module');
+            }
+
             $guid = create_guid();
             $options = array();
             if (isset($_POST['type'], $_POST['type_module']) && $_POST['type'] == 'web') {
@@ -156,6 +161,9 @@ class MySugar
                 $current_user->setPreference('dashlets', $dashlets, 0, $this->type);
             }
 
+            if (!file_exists($dashlets[$id]['fileLocation'])) {
+                return;
+            }
             require_once($dashlets[$id]['fileLocation']);
             $dashlet = new $dashlets[$id]['className']($id, (isset($dashlets[$id]['options']) ? $dashlets[$id]['options'] : array()));
             if (!empty($_REQUEST['configure']) && $_REQUEST['configure']) { // save settings

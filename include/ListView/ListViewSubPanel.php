@@ -46,6 +46,7 @@ if (!defined('sugarEntry') || !sugarEntry) {
      * ListView for the subpanel- list of many objects
      * @api
      */
+    #[\AllowDynamicProperties]
     class ListViewSubPanel extends ListView
     {
         protected $smartyTemplate;
@@ -140,7 +141,7 @@ if (!defined('sugarEntry') || !sugarEntry) {
             $html_var = $this->subpanel_module . "_CELL";
 
             $list_data = $this->processUnionBeans($sugarbean, $subpanel_def, $html_var, $countOnly);
-            
+
             if ($countOnly) {
                 return $list_data;
             }
@@ -534,7 +535,7 @@ if (!defined('sugarEntry') || !sugarEntry) {
             if (!isset($current_offset) || empty($current_offset)) {
                 $current_offset=0;
             }
-            $start_record = $current_offset + 1;
+            $start_record = (int)$current_offset + 1;
 
             if (!is_numeric($col_count)) {
                 $col_count = 20;
@@ -839,7 +840,7 @@ if (!defined('sugarEntry') || !sugarEntry) {
                     if ($this->base_URL == "/index.php") {
                         $this->base_URL .= "?";
                     } else {
-                        if ($fullRequestString == substr($this->baseURL, '-' . strlen($fullRequestString))) {
+                        if ($fullRequestString == substr($this->base_URL, '-' . strlen($fullRequestString ?? ''))) {
                             $this->base_URL = preg_replace("/&" . $key . "\=.*/", "", $this->base_URL);
                         } else {
                             $this->base_URL = preg_replace("/&" . $key . "\=.*?&/", "&", $this->base_URL);

@@ -44,6 +44,7 @@
  * Extends regular PHP DateTime with useful services
  * @api
  */
+#[\AllowDynamicProperties]
 class SugarDateTime extends DateTime
 {
     // Recognized properties and their formats
@@ -108,7 +109,8 @@ class SugarDateTime extends DateTime
      * @return SugarDateTime
      * @see DateTime::createFromFormat
      */
-    public static function createFromFormat($format, $time, $timezone = null)
+    #[ReturnTypeWillChange]
+    public static function createFromFormat($format, $time, $timezone = null) : DateTime|false
     {
         if (empty($time) || empty($format)) {
             return false;
@@ -139,11 +141,15 @@ class SugarDateTime extends DateTime
      * @deprecated No longer necessary since PHP 5.2 is no longer supported.
      * @param string $format Format like in date()
      * @param string $time Time string to parse
-     * @param DateTimeZone $timezone TZ
+     * @param \DateTimeZone|null $timezone TZ
      * @return SugarDateTime
      * @see DateTime::createFromFormat
      */
-    protected static function _createFromFormat($format, $time, DateTimeZone $timezone = null)
+    // STIC Custom 20250220 JBL - Avoid Deprecated Warning: Using explicit nullable type
+    // https://github.com/SinergiaTIC/SinergiaCRM/pull/477
+    // protected static function _createFromFormat($format, $time, DateTimeZone $timezone = null)
+    protected static function _createFromFormat($format, $time, ?DateTimeZone $timezone = null)
+    // END STIC Custom    
     {
         $res = new self();
         if (!empty($timezone)) {
@@ -156,7 +162,7 @@ class SugarDateTime extends DateTime
             // strip spaces before am/pm as our formats don't have them
             $time = preg_replace('/\s+(AM|PM)/i', '\1', $time);
             // TODO: better way to not risk locale stuff problems?
-            $data = strptime($time, $str_format);
+            $data = date_parse_from_format($str_format, $time);
             if (empty($data)) {
                 $GLOBALS['log']->error("Cannot parse $time for format $format");
                 return null;
@@ -176,7 +182,7 @@ class SugarDateTime extends DateTime
             $data += self::$data_init; // fill in missing parts
         } else {
             // Windows, etc. might not have strptime - we'd have to work harder here
-            $data = $res->_strptime($time, $format);
+            $data = date_parse_from_format($format, $time);
         }
         if (empty($data)) {
             $GLOBALS['log']->error("Cannot parse $time for format $format");

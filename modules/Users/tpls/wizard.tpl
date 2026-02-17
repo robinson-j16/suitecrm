@@ -64,7 +64,7 @@
 <form id="UserWizard" name="UserWizard" enctype='multipart/form-data' method="POST" action="index.php" onkeypress="return disableReturnSubmission(event);">
 <input type='hidden' name='action' value='SaveUserWizard'/>
 <input type='hidden' name='module' value='Users'/>
-<span class='error'>{$error.main}</span>
+<span class='error'>{$error.main|default:''}</span>
 <script type="text/javascript" src="{sugar_getjspath file='cache/include/javascript/sugar_grp_yui_widgets.js'}"></script>
 <script type="text/javascript" src="{sugar_getjspath file='modules/Emails/javascript/vars.js'}"></script>
 <script type="text/javascript" src="{sugar_getjspath file='cache/include/javascript/sugar_grp_emails.js'}"></script>
@@ -248,6 +248,10 @@
                             {capture name=SMARTY_LOCALE_NAME_FORMAT_DESC}&nbsp;{$MOD.LBL_LOCALE_NAME_FORMAT_DESC}{/capture}
                             <td nowrap="nowrap" scope="row" valign="top">{$MOD.LBL_LOCALE_DEFAULT_NAME_FORMAT}:&nbsp;{sugar_help text=$smarty.capture.SMARTY_LOCALE_NAME_FORMAT_DESC }</td>
                             <td><span><select id="default_locale_name_format" tabindex='14' name="default_locale_name_format" selected="{$default_locale_name_format}">{$NAMEOPTIONS}</select></span></td>
+                        </tr>
+                        <tr>
+                            <td nowrap="nowrap" scope="row" valign="top">{$MOD.LBL_USER_LANGUAGE}:&nbsp;</td>
+                            <td><span><select id="user_language" tabindex='14' name="user_language" >{$user_language}</select></span></td>
                         </tr>
                     </table>
                 </div>

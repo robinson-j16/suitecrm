@@ -47,6 +47,7 @@ if (!defined('sugarEntry') || !sugarEntry) {
 
 require_once('include/Dashlets/DashletGenericChart.php');
 
+#[\AllowDynamicProperties]
 class OpportunitiesByLeadSourceDashlet extends DashletGenericChart
 {
     public $pbls_lead_sources = array();
@@ -106,7 +107,7 @@ class OpportunitiesByLeadSourceDashlet extends DashletGenericChart
         $jsonData = json_encode($chartReadyData['data']);
         $jsonKeys = json_encode($chartReadyData['keys']);
         $jsonLabels = json_encode($chartReadyData['labels']);
-        $jsonLabelsAndValues = json_encode($chartReadyData['labelsAndValues']);
+        $jsonLabelsAndValues = json_encode($chartReadyData['labelsAndValues'] ?? []);
 
         $autoRefresh = $this->processAutoRefresh();
 
@@ -226,12 +227,17 @@ EOD;
 
     protected function prepareChartData($data, $currency_symbol, $thousands_symbol)
     {
+        $chart = [];
         //return $data;
         $chart['labels'] = [];
         $chart['data'] = [];
         $chart['keys'] = [];
+        $chart['labelsAndValues'] = [];
         $total = 0;
         foreach ($data as $i) {
+            if (!isset($i['lead_source_key'])){
+                $i['lead_source_key'] = $i['lead_source'];
+            }
             $chart['labelsAndValues'][] = $i['lead_source'] . ' (' . $currency_symbol . (int)$i['total'] . $thousands_symbol . ')';
             //$chart['labelsAndValues'][]=$currency_symbol.(int)$i['total'].$thousands_symbol;
             $chart['labels'][] = $i['lead_source'];
@@ -251,10 +257,10 @@ EOD;
         $query = "SELECT lead_source,sum(amount_usdollar/1000) as total,count(*) as opp_count ".
             "FROM opportunities ";
         $query .= "WHERE opportunities.deleted=0 ";
-        if (count($this->pbls_ids) > 0) {
+        if (isset($this->pbls_ids) && count($this->pbls_ids) > 0) {
             $query .= "AND opportunities.assigned_user_id IN ('".implode("','", $this->pbls_ids)."') ";
         }
-        if (count($this->pbls_lead_sources) > 0) {
+        if (isset($this->pbls_lead_sources) && count($this->pbls_lead_sources) > 0) {
             $query .= "AND opportunities.lead_source IN ('".implode("','", $this->pbls_lead_sources)."') ";
         } else {
             $query .= "AND opportunities.lead_source IN ('".implode("','", array_keys($GLOBALS['app_list_strings']['lead_source_dom']))."') ";

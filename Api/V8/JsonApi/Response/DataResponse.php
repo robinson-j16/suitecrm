@@ -1,6 +1,7 @@
 <?php
 namespace Api\V8\JsonApi\Response;
 
+#[\AllowDynamicProperties]
 class DataResponse implements \JsonSerializable
 {
     /**
@@ -105,7 +106,7 @@ class DataResponse implements \JsonSerializable
     /**
      * @inheritdoc
      */
-    public function jsonSerialize()
+    public function jsonSerialize(): mixed
     {
         $response = [
             'type' => $this->getType(),

@@ -38,7 +38,11 @@
  * display the words "Powered by SugarCRM" and "Supercharged by SuiteCRM".
  */
 *}
-
+<script>
+    {if $EMAIL_TINYMCE_CONFIG}
+    window.emailTinyMCEConfig = {$EMAIL_TINYMCE_CONFIG};
+    {/if}
+</script>
 {{sugar_include type="smarty" file=$headerTpl}}
 {sugar_include include=$includes}
 {* Compose view has a TEMP ID in case you want to display multi instance of the ComposeView *}
@@ -256,10 +260,13 @@
       $(document).ready(function() {ldelim}
         $('#ComposeView').EmailsComposeView({if $RETURN_MODULE != 'Emails' && $RETURN_ID}{ldelim}
           'attachment': {ldelim}
-            'module': '{$RETURN_MODULE}',
-            'id': '{$RETURN_ID}'
+            'module': '{$RETURN_MODULE|escape:'javascript'}',
+            'id': '{$RETURN_ID|escape:'javascript'}'
           {rdelim}
         {rdelim}{/if});
+      {rdelim});
+      $( "#emails_email_templates_name" ).change(function() {ldelim}
+          $.fn.EmailsComposeView.onTemplateChange()
       {rdelim});
     </script>
     {/if}

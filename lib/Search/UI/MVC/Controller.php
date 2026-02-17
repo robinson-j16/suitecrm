@@ -49,6 +49,7 @@ if (!defined('sugarEntry') || !sugarEntry) {
 /**
  * Generic controller for the Search Framework.
  */
+#[\AllowDynamicProperties]
 abstract class Controller
 {
     /** @var View */
@@ -145,6 +146,6 @@ abstract class Controller
      */
     private function getActionName(): string
     {
-        return 'do' . filter_input(INPUT_GET, 'do', FILTER_SANITIZE_STRING);
+        return 'do' . filter_input(INPUT_GET, 'do');
     }
 }

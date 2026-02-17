@@ -52,6 +52,7 @@ require_once __DIR__ . '/../../modules/Configurator/Configurator.php';
  * Class PDFConfigurator
  * @package SuiteCRM\PDF
  */
+#[\AllowDynamicProperties]
 class PDFConfigurator
 {
     /** @var Configurator */
@@ -61,7 +62,7 @@ class PDFConfigurator
      * PDFConfigurator constructor.
      * @param Configurator|null $configurator
      */
-    public function __construct(Configurator $configurator = null)
+    public function __construct(?Configurator $configurator = null)
     {
         if ($configurator === null) {
             $configurator = new Configurator();

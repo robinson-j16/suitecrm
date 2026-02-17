@@ -45,7 +45,7 @@ if (!defined('sugarEntry') || !sugarEntry) {
 $mod_strings = array(
     'ERR_NO_2FACTOR_EMAIL_TMPL' => 'Two-factor email template is not set, please change settings on password management page.',
     'ERR_NO_2FACTOR_EMAIL_TMPL_CODE' => 'Two-factor email template should contain a $code at least.',
-    'LBL_DELETE_USER_CONFIRM' => 'When the User record is deleted, the corresponding Employee record will also be deleted. After the user is deleted, any workflow definitions and reports involving the user might need to be updated.<br/><br/> Deleting a User record cannot be undone.',
+    'LBL_DELETE_USER_CONFIRM' => 'When the User record is deleted, the corresponding Employee record will also be deleted. After the user is deleted, any workflow definitions and reports involving the user might need to be updated.<br/><br/> Personal / Group Inbound Accounts that contain / are assigned to this user will also need updated. <br/><br/> Deleting a User record cannot be undone.',
     'LBL_DELETE_GROUP_CONFIRM' => 'Are you sure you want to delete this Group User? Click OK to delete the User record.<br/>After clicking OK, you will be given the ability to reassign records assigned to the Group User to another user.',
     'LNK_IMPORT_USERS' => 'Import Users',
     'ERR_DELETE_RECORD' => 'A record number must be specified to delete the account.',
@@ -84,6 +84,7 @@ $mod_strings = array(
     'ERR_RECIPIENT_EMAIL' => 'Recipient Email Address',
     'ERR_SERVER_STATUS' => 'Your server status',
     'ERR_SERVER_SMTP_EMPTY' => 'The system is unable to send an email to the user. Please check the Outgoing Mail Configuration in <a href="index.php?module=EmailMan&action=config">Email Settings</a>.',
+    'ERR_DELETE_USER' => 'It is not allowed to delete logged in user.',
     'LBL_ADDRESS_CITY' => 'Address City',
     'LBL_ADDRESS_COUNTRY' => 'Address Country',
     'LBL_ADDRESS_INFORMATION' => 'Address Information',
@@ -96,6 +97,7 @@ $mod_strings = array(
     'LBL_REGULAR_DESC' => 'User can access modules and records based on roles.',
     'LBL_PHOTO' => 'Photo',
     'LBL_ADMIN' => 'System Administrator',
+    'LBL_LAST_ADMIN_NOTICE' => 'Current selection could include yourself. You cannot change your own type of user or status.',
     'LBL_ADVANCED' => 'Advanced',
     'LBL_ANY_ADDRESS' => 'Any Address:',
     'LBL_ANY_EMAIL' => 'Any Email',
@@ -120,6 +122,7 @@ $mod_strings = array(
     'LBL_NUMBER_GROUPING_SEP_TEXT' => 'Character used to separate thousands',
     'LBL_DECIMAL_SEP' => 'Decimal Symbol',
     'LBL_DECIMAL_SEP_TEXT' => 'Character used to separate decimal portion',
+    'LBL_USER_LANGUAGE' => 'User Language',
     'LBL_FDOW' => 'First Day of Week',
     'LBL_FDOW_TEXT' => 'First Day displayed in Week, Month, and Year Views',
     'LBL_DATE_FORMAT_TEXT' => 'Set the display format for date stamps',
@@ -682,12 +685,12 @@ $mod_strings = array(
     'ERR_USER_FACTOR_SMTP_REQUIRED' => 'SMTP server settings required first.',
     'ERR_USER_FACTOR_CHANGE_DISABLED' => 'Current user is not able to change two factor authentication settings.',
     'LNK_IMPORT_CAMPAIGNS' => 'Import Campaign',
-    // for Google Token/Synchronization settings
-    'LBL_GOOGLE_API_SETTINGS' => 'Google Account Synchronization',
-    'LBL_GOOGLE_API_TOKEN' => 'Google API Token',
-    'LBL_GOOGLE_API_TOKEN_HELP' => 'Use this to authorize SuiteCRM to access your Google Calendar. This is required for synchronization. Don\'t forget to check the "Enable Calendar Sync" checkbox when done.',
-    'LBL_GOOGLE_API_TOKEN_BTN' => 'Get Token',
-    'LBL_GSYNC_CAL' => 'Enable Calendar Sync',
-    // END Google Token/Synchronization settings
+
+    'LNK_ACCESS_TOKENS' => 'API Access Tokens',
+    'LNK_LIST_OUTBOUND_EMAIL_ACCOUNTS' => 'Outbound Email Accounts',
+    'LNK_LIST_INBOUND_EMAIL_ACCOUNTS' => 'Inbound Email Accounts',
+    'LNK_EXTERNAL_OAUTH_CONNECTIONS' => 'External OAuth Connections',
+
+    'LNK_LIST_CALENDAR_ACCOUNTS' => 'View Calendar Accounts',
 
 ); // END STRINGS DEFS

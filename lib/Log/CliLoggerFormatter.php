@@ -45,10 +45,12 @@ if (!defined('sugarEntry') || !sugarEntry) {
 
 use Monolog\Formatter\FormatterInterface;
 use Monolog\Logger;
+use Monolog\LogRecord;
 
 /**
  * CliLoggerFormatter for CliLoggerHandler.
  */
+#[\AllowDynamicProperties]
 class CliLoggerFormatter implements FormatterInterface
 {
     /**  @var array a list of the available colours for quicker usage */
@@ -95,15 +97,15 @@ class CliLoggerFormatter implements FormatterInterface
         }
         return $formatted;
     }
-
+    
     /**
      * Formats a log record.
      *
-     * @param  array $record A record to format
+     * @param array|LogRecord $record A record to format
      *
      * @return mixed The formatted record
      */
-    public function format(array $record)
+    public function format(array|LogRecord $record)
     {
         $level = $record['level'];
         $message = $record['message'];
@@ -114,7 +116,7 @@ class CliLoggerFormatter implements FormatterInterface
             $message = $color . $message . $this->colors['reset'];
         }
 
-        $message = preg_replace("/\n\s*/", $this->padding . $color, $message);
+        $message = preg_replace("/\n\s*/", $this->padding . $color, (string) $message);
 
         $time = (new \DateTime())->format('H:i:s');
 

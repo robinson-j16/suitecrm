@@ -4,6 +4,7 @@ if (!defined('sugarEntry') || !sugarEntry) {
     die('Not A Valid Entry Point');
 }
 
+#[\AllowDynamicProperties]
 class Jjwg_MapsViewQuick_Radius_Display extends SugarView
 {
     public function __construct()
@@ -16,6 +17,7 @@ class Jjwg_MapsViewQuick_Radius_Display extends SugarView
 
     public function display()
     {
+        global $mod_strings;
         $url = 'index.php?module='.$GLOBALS['currentModule'].'&action=map_markers';
         foreach (array_keys($_REQUEST) as $key) {
             // Exclude certain request parameters
@@ -23,7 +25,7 @@ class Jjwg_MapsViewQuick_Radius_Display extends SugarView
                 $url .= '&'.$key.'='.urlencode($_REQUEST[$key]);
             }
         } ?>
-<h2><?php echo htmlspecialchars($_REQUEST['quick_address']); ?><div class="clear"></div></h2>
+<h2><?php echo htmlspecialchars((string) $_REQUEST['quick_address']); ?><div class="clear"></div></h2>
 <div class="clear"></div>
 
 <iframe src="<?php echo $url; ?>"

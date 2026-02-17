@@ -39,6 +39,7 @@
  */
 
 
+#[\AllowDynamicProperties]
 class EmailManController extends SugarController
 {
     public function action_Save()
@@ -60,15 +61,6 @@ class EmailManController extends SugarController
             $_REQUEST['mail_sendtype'] = "SMTP";
         }
 
-        // save Outbound settings  #Bug 20033 Ensure data for Outbound email exists before trying to update the system mailer.
-        if (isset($_REQUEST['mail_sendtype']) && empty($_REQUEST['campaignConfig'])) {
-            $oe = new OutboundEmail();
-            $oe->populateFromPost();
-            $oe->saveSystem();
-        }
-
-
-
         $focus = BeanFactory::newBean('Administration');
 
         if (isset($_POST['tracking_entities_location_type'])) {
@@ -80,9 +72,6 @@ class EmailManController extends SugarController
         // cn: handle mail_smtpauth_req checkbox on/off (removing double reference in the form itself
         if (!isset($_POST['mail_smtpauth_req'])) {
             $_POST['mail_smtpauth_req'] = 0;
-            if (empty($_POST['campaignConfig'])) {
-                $_POST['notify_allow_default_outbound'] = 0; // If smtp auth is disabled ensure outbound is disabled.
-            }
         }
 
         if (!empty($_POST['notify_allow_default_outbound'])) {
@@ -102,6 +91,10 @@ class EmailManController extends SugarController
             $configurator->config['email_enable_auto_send_opt_in'] = (isset($_REQUEST['email_enable_auto_send_opt_in'])) ? true : false;
             $configurator->config['email_confirm_opt_in_email_template_id'] = isset($_REQUEST['email_template_id_opt_in']) ? $_REQUEST['email_template_id_opt_in'] : $configurator->config['aop']['confirm_opt_in_template_id'];
             $configurator->config['email_allow_send_as_user']  = (isset($_REQUEST['mail_allowusersend']) && $_REQUEST['mail_allowusersend'] == '1') ? true : false;
+            $configurator->config['email_import_per_run_threshold']  = $_REQUEST['email_import_per_run_threshold'] ?? $configurator->config['email_import_per_run_threshold'];
+            $configurator->config['email_import_fetch_unread_only']  = isset($_REQUEST['email_import_fetch_unread_only']) && isTrue($_REQUEST['email_import_fetch_unread_only']);
+            $configurator->config['email_import_timeframe_start']  = $_REQUEST['email_import_timeframe_start'] ?? $configurator->config['email_import_timeframe_start'];
+            $configurator->config['legacy_email_behaviour']  = isTrue($_REQUEST['legacy_email_behaviour'] ?? false);
             ///////////////////////////////////////////////////////////////////////////////
             ////	SECURITY
             $security = array();
@@ -155,7 +148,7 @@ class EmailManController extends SugarController
 
             $configurator->handleOverride();
         }
-        
+
         SugarThemeRegistry::clearAllCaches();
     }
 }

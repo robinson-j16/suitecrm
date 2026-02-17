@@ -5,7 +5,7 @@
  * SugarCRM, Inc. Copyright (C) 2004-2013 SugarCRM Inc.
  *
  * SuiteCRM is an extension to SugarCRM Community Edition developed by SalesAgility Ltd.
- * Copyright (C) 2011 - 2018 SalesAgility Ltd.
+ * Copyright (C) 2011 - 2024 SalesAgility Ltd.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by the
@@ -250,8 +250,18 @@ class SugarView
         if ($this->_getOption('json_output')) {
             $content = ob_get_clean();
             $module = $this->module;
+
+            $processed_content = $content;
+            if (mb_detect_encoding($content) !== "UTF-8") {
+                global $sugar_config;
+                $target_charset = $sugar_config['default_charset'] ?? 'UTF-8';
+                $detected = mb_detect_encoding($content, [$target_charset, 'ISO-8859-1', 'Windows-1252'], true);
+                $source_charset = $detected ?: $target_charset;
+                $processed_content = mb_convert_encoding($content, 'UTF-8', $source_charset);
+            }
+            
             $ajax_ret = array(
-                'content' => mb_detect_encoding($content) == "UTF-8" ? $content : utf8_encode($content),
+                'content' => $processed_content,
                 'menu' => array(
                     'module' => $module,
                     'label' => translate($module),
@@ -390,6 +400,7 @@ class SugarView
         $ss->assign("THEME_IE6COMPAT", $themeObject->ie6compat ? 'true' : 'false');
         $ss->assign("MODULE_NAME", $this->module);
         $ss->assign("langHeader", get_language_header());
+        $ss->assign("BROWSER_TITLE", $this->getBrowserTitle());
 
 
         // set ab testing if exists
@@ -877,6 +888,53 @@ class SugarView
         require_once('modules/Currencies/Currency.php');
         list($num_grp_sep, $dec_sep) = get_number_separators();
 
+        $php_date_format = $timedate->get_date_format();
+        $php_time_format = $timedate->get_time_format();
+        $php_datetime_format = "$php_date_format $php_time_format";
+        $convertDbTimestampToUserTZJsFunction = <<<JS
+function convertDbTimestampToUserTZ(dbTimestamp) {
+        if (!dbTimestamp) {
+            return null;
+        }
+
+        var utcDate = new Date(dbTimestamp.replace(' ', 'T') + 'Z');
+
+        if (isNaN(utcDate.getTime())) {
+            return null;
+        }
+
+        var userDate = new Date(utcDate.getTime() + ($hour_offset * 1000));
+    
+        const tokens = {
+            Y: () => String(userDate.getUTCFullYear()),
+            y: () => String(userDate.getUTCFullYear()).slice(-2),
+            F: () => userDate.toLocaleString(undefined, { month: 'long', timeZone: 'UTC' }),
+            M: () => userDate.toLocaleString(undefined, { month: 'short', timeZone: 'UTC' }),
+            m: () => String(userDate.getUTCMonth() + 1).padStart(2, '0'),
+            n: () => String(userDate.getUTCMonth() + 1),
+            d: () => String(userDate.getUTCDate()).padStart(2, '0'),
+            j: () => String(userDate.getUTCDate()),
+            D: () => userDate.toLocaleString(undefined, { weekday: 'short', timeZone: 'UTC' }),
+            l: () => userDate.toLocaleString(undefined, { weekday: 'long', timeZone: 'UTC' }),
+            H: () => String(userDate.getUTCHours()).padStart(2, '0'),
+            h: () => String(userDate.getUTCHours() % 12 || 12).padStart(2, '0'),
+            G: () => String(userDate.getUTCHours()),
+            g: () => String(userDate.getUTCHours() % 12 || 12),
+            i: () => String(userDate.getUTCMinutes()).padStart(2, '0'),
+            s: () => String(userDate.getUTCSeconds()).padStart(2, '0'),
+            a: () => userDate.getUTCHours() < 12 ? 'am' : 'pm',
+            A: () => userDate.getUTCHours() < 12 ? 'AM' : 'PM'
+        };
+
+        let formatted = '$php_datetime_format';
+        Object.keys(tokens)
+            .sort((a, b) => b.length - a.length)
+            .forEach(token => formatted = formatted.split(token).join(tokens[token]()));
+
+        return formatted;
+    }
+JS;
+
         $the_script =
             "<script type=\"text/javascript\">\n" .
             "\tvar time_reg_format = '" .
@@ -891,6 +949,7 @@ class SugarView
             "\tvar time_offset = $hour_offset;\n" .
             "\tvar num_grp_sep = '$num_grp_sep';\n" .
             "\tvar dec_sep = '$dec_sep';\n" .
+            "\t$convertDbTimestampToUserTZJsFunction\n" .
             "</script>";
 
         return $the_script;
@@ -1014,6 +1073,7 @@ EOHTML;
 
         $ss = new Sugar_Smarty();
         $ss->assign("AUTHENTICATED", isset($_SESSION["authenticated_user_id"]));
+        $ss->assign("APP", $app_strings);
         $ss->assign('MOD', return_module_language($GLOBALS['current_language'], 'Users'));
 
         $bottomLinkList = array();
@@ -1251,7 +1311,7 @@ EOHTML;
     private function _calculateFooterMetrics()
     {
         $endTime = microtime(true);
-        $deltaTime = $endTime - (isset($GLOBALS['startTime']) ? $GLOBALS['startTime'] : null);
+        $deltaTime = $endTime - (isset($GLOBALS['startTime']) ? $GLOBALS['startTime'] : 0);
         $this->responseTime = number_format(round($deltaTime, 2), 2);
         // Print out the resources used in constructing the page.
         $this->fileResources = count(get_included_files());
@@ -1263,7 +1323,7 @@ EOHTML;
     private function _getStatistics()
     {
         $endTime = microtime(true);
-        $deltaTime = $endTime - (isset($GLOBALS['startTime']) ? $GLOBALS['startTime'] : null);
+        $deltaTime = $endTime - (isset($GLOBALS['startTime']) ? $GLOBALS['startTime'] : 0);
         $response_time_string =
             $GLOBALS['app_strings']['LBL_SERVER_RESPONSE_TIME'] .
             ' ' .
@@ -1495,14 +1555,14 @@ EOHTML;
         if (!empty($paramString)) {
             $theTitle .= "<h2 class='module-title-text'> $paramString </h2>";
 
-            if ($this->type == "detail") {
+            if ($this->type === "detail") {
                 $theTitle .= "<div class='favorite' record_id='" .
                     $this->bean->id .
                     "' module='" .
                     $this->bean->module_dir .
-                    "'><div class='favorite_icon_outline'>" .
+                    "'><div class='favorite_icon_outline' title='" . translate('LBL_MARK_FAVORITE', 'Favorites') . "'>" .
                     "<span class='suitepicon suitepicon-favorite-star-outline'></span></div>
-                                                    <div class='favorite_icon_fill' 'title=\"' . translate('LBL_DASHLET_EDIT', 'Home') . '\" border=\"0\"  align=\"absmiddle\"'>" .
+                                                    <div class='favorite_icon_fill' title='" . translate('LBL_UNMARK_FAVORITE', 'Favorites') . "' border=\"0\"  align=\"absmiddle\">" .
 
                     "<span class='suitepicon suitepicon-favorite-star'></span></div></div>";
             }
@@ -1599,7 +1659,7 @@ EOHTML;
                     }
                     break;
                 case 'DetailView':
-                    $beanName = $this->bean->get_summary_text();
+                    $beanName = $this->bean?->get_summary_text() ?? '';
                     $params[] = $beanName;
                     break;
             }

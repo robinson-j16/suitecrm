@@ -1,30 +1,34 @@
 <?php
 /**
- * Advanced OpenReports, SugarCRM Reporting.
- * @package Advanced OpenReports for SugarCRM
- * @copyright SalesAgility Ltd http://www.salesagility.com
+ * SuiteCRM is a customer relationship management program developed by SuiteCRM Ltd.
+ * Copyright (C) 2011 - 2025 SuiteCRM Ltd.
  *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU AFFERO GENERAL PUBLIC LICENSE as published by
- * the Free Software Foundation; either version 3 of the License, or
- * (at your option) any later version.
+ * This program is free software; you can redistribute it and/or modify it under
+ * the terms of the GNU Affero General Public License version 3 as published by the
+ * Free Software Foundation with the addition of the following permission added
+ * to Section 15 as permitted in Section 7(a): FOR ANY PART OF THE COVERED WORK
+ * IN WHICH THE COPYRIGHT IS OWNED BY SUITECRM, SUITECRM DISCLAIMS THE
+ * WARRANTY OF NON INFRINGEMENT OF THIRD PARTY RIGHTS.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more
+ * details.
  *
- * You should have received a copy of the GNU AFFERO GENERAL PUBLIC LICENSE
- * along with this program; if not, see http://www.gnu.org/licenses
- * or write to the Free Software Foundation,Inc., 51 Franklin Street,
- * Fifth Floor, Boston, MA 02110-1301  USA
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
- * @author SalesAgility <info@salesagility.com>
+ * In accordance with Section 7(b) of the GNU Affero General Public License
+ * version 3, these Appropriate Legal Notices must retain the display of the
+ * "Supercharged by SuiteCRM" logo. If the display of the logos is not reasonably
+ * feasible for technical reasons, the Appropriate Legal Notices must display
+ * the words "Supercharged by SuiteCRM".
  */
 
+#[\AllowDynamicProperties]
 class AOR_Chart extends Basic
 {
-    const COLOUR_DEFAULTS = "['#1f78b4','#a6cee3','#b2df8a','#33a02c','#fb9a99','#e31a1c','#fdbf6f','#ff7f00','#cab2d6','#6a3d9a','#ffff99','#b15928','#144c73','#6caed1','#8acf4e','#20641c','#f8514f','#9e1214','#fc9d24','#b35900','#a880bb','#442763','#ffff4d','#733a1a']";
+    public const COLOUR_DEFAULTS = "['#1f78b4','#a6cee3','#b2df8a','#33a02c','#fb9a99','#e31a1c','#fdbf6f','#ff7f00','#cab2d6','#6a3d9a','#ffff99','#b15928','#144c73','#6caed1','#8acf4e','#20641c','#f8514f','#9e1214','#fc9d24','#b35900','#a880bb','#442763','#ffff4d','#733a1a']";
     public $colours;
     public $new_schema = true;
     public $module_dir = 'AOR_Charts';
@@ -166,8 +170,8 @@ class AOR_Chart extends Basic
             //Malformed chart object - missing an axis field
             return '';
         }
-        $xName = str_replace(' ', '_', $x->label) . $this->x_field;
-        $yName = str_replace(' ', '_', $y->label) . $this->y_field;
+        $xName = str_replace(' ', '_', (string) $x->label) . $this->x_field;
+        $yName = str_replace(' ', '_', (string) $y->label) . $this->y_field;
 
         $chartData = new pData();
         $chartData->loadPalette("modules/AOR_Charts/lib/pChart/palettes/navy.color", true);
@@ -228,7 +232,7 @@ class AOR_Chart extends Basic
         return $img;
     }
 
-    public function buildChartHTML(array $reportData, array $fields, $index = 0, $chartType = AOR_Report::CHART_TYPE_PCHART, AOR_Field $mainGroupField = null)
+    public function buildChartHTML(array $reportData, array $fields, $index = 0, $chartType = AOR_Report::CHART_TYPE_PCHART, ?AOR_Field $mainGroupField = null)
     {
         switch ($chartType) {
             case AOR_Report::CHART_TYPE_PCHART:
@@ -262,7 +266,7 @@ class AOR_Chart extends Basic
         return false;
     }
 
-    private function buildChartHTMLRGraph(array $reportData, array $fields, AOR_Field $mainGroupField = null)
+    private function buildChartHTMLRGraph(array $reportData, array $fields, ?AOR_Field $mainGroupField = null)
     {
         $html = '';
         if (!in_array($this->type, $this->getValidChartTypes())) {
@@ -274,8 +278,8 @@ class AOR_Chart extends Basic
             //Malformed chart object - missing an axis field
             return '';
         }
-        $xName = str_replace(' ', '_', $x->label) . $this->x_field;
-        $yName = str_replace(' ', '_', $y->label) . $this->y_field;
+        $xName = str_replace(' ', '_', (string) $x->label) . $this->x_field;
+        $yName = str_replace(' ', '_', (string) $y->label) . $this->y_field;
 
         $defaultHeight = 500;
         $defaultWidth = 900;
@@ -351,7 +355,7 @@ class AOR_Chart extends Basic
 
     private function getRGraphRoseChart($chartDataValues, $chartLabelValues, $chartTooltips, $chartName, $chartId, $chartHeight = 400, $chartWidth = 400)
     {
-        $dataArray = json_decode($chartDataValues);
+        $dataArray = json_decode((string) $chartDataValues);
         if (!is_array($dataArray)||count($dataArray) < 1) {
             return "<h3>$this->noDataMessage</h3>";
         }
@@ -387,7 +391,7 @@ EOF;
     //or stacked (false)
     private function getRGraphGroupedBarChart($chartDataValues, $chartLabelValues, $chartTooltips, $chartName, $chartId, $chartHeight = 400, $chartWidth = 400, $grouped = false)
     {
-        $dataArray = json_decode($chartDataValues);
+        $dataArray = json_decode((string) $chartDataValues);
         $grouping = 'grouped'; //$mainGroupField->label; //'grouped';
         if (!$grouped) {
             $grouping='stacked';
@@ -404,7 +408,6 @@ EOF;
             data: $chartDataValues,
             options: {
                 grouping:'$grouping',
-                backgroundGrid:false,
                 backgroundGrid:false,
                 gutterBottom: 150,
                 gutterTop:25,
@@ -433,7 +436,7 @@ EOF;
 
     private function getRGraphBarChart($chartDataValues, $chartLabelValues, $chartTooltips, $chartName, $chartId, $chartHeight = 400, $chartWidth = 400)
     {
-        $dataArray = json_decode($chartDataValues);
+        $dataArray = json_decode((string) $chartDataValues);
         if (!is_array($dataArray)||count($dataArray) < 1) {
             return "<h3>$this->noDataMessage</h3>";
         }
@@ -472,7 +475,7 @@ EOF;
 
     private function getRGraphRadarChart($chartDataValues, $chartLabelValues, $chartTooltips, $chartName, $chartId, $chartHeight = 400, $chartWidth = 400)
     {
-        $dataArray = json_decode($chartDataValues);
+        $dataArray = json_decode((string) $chartDataValues);
         if (!is_array($dataArray)||count($dataArray) < 1) {
             return "<h3>$this->noDataMessage</h3>";
         }
@@ -504,7 +507,7 @@ EOF;
 
     private function getRGraphPieChart($chartDataValues, $chartLabelValues, $chartTooltips, $chartName, $chartId, $chartHeight = 400, $chartWidth = 400)
     {
-        $dataArray = json_decode($chartDataValues);
+        $dataArray = json_decode((string) $chartDataValues);
         if (!is_array($dataArray)||count($dataArray) < 1) {
             return "<h3>$this->noDataMessage</h3>";
         }
@@ -539,7 +542,7 @@ EOF;
 
     private function getRGraphLineChart($chartDataValues, $chartLabelValues, $chartTooltips, $chartName, $chartId, $chartHeight = 400, $chartWidth = 400)
     {
-        $dataArray = json_decode($chartDataValues);
+        $dataArray = json_decode((string) $chartDataValues);
         if (!is_array($dataArray)||count($dataArray) < 1) {
             return "<h3>$this->noDataMessage</h3>";
         }
@@ -591,8 +594,8 @@ EOF;
             //Malformed chart object - missing an axis field
             return '';
         }
-        $xName = str_replace(' ', '_', $x->label) . $this->x_field;
-        $yName = str_replace(' ', '_', $y->label) . $this->y_field;
+        $xName = str_replace(' ', '_', (string) $x->label) . $this->x_field;
+        $yName = str_replace(' ', '_', (string) $y->label) . $this->y_field;
 
         switch ($this->type) {
             case 'radar':
@@ -658,14 +661,13 @@ EOF;
 
     private function getShortenedLabel($label, $maxLabelSize = 20)
     {
-        if (strlen($label) > $maxLabelSize) {
+        if (strlen((string) $label) > $maxLabelSize) {
             return mb_substr($label, 0, $maxLabelSize).'...';
         }
         return $label;
     }
 
-
-    private function getRGraphGroupedBarChartData($reportData, $xName, $yName, AOR_Field $mainGroupField = null)
+    private function getRGraphGroupedBarChartData($reportData, $xName, $yName, ?AOR_Field $mainGroupField = null)
     {
 
 
@@ -674,7 +676,7 @@ EOF;
         $zName = null;
         foreach ($reportData[0] as $key => $value) {
             $field = str_replace(' ', '_', is_null($mainGroupField) ? 'no data' : $mainGroupField->label);
-            if (preg_match('/^' . $field . '[0-9]+/', $key)) {
+            if (preg_match('/^' . $field . '[0-9]+/', (string) $key)) {
                 $zName = $key;
                 break;
             }
@@ -701,10 +703,12 @@ EOF;
 
         $_data = array();
         foreach ($data as $label => $values) {
+            $_data[$label] = [];
             foreach ($values as $key => $value) {
-                $_data[$label][$tooltips[$label][$key]] += $value;
+                $_data[$label][$tooltips[$label][$key]] = ($_data[$label][$tooltips[$label][$key]] ?? 0) + 1;
             }
         }
+
         $data = $_data;
 
 
@@ -735,6 +739,7 @@ EOF;
 
     private function getRGraphBarChartData($reportData, $xName, $yName)
     {
+        $chart = [];
         $chart['labels']=array();
         $chart['data']=array();
         $chart['tooltips']=array();

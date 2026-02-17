@@ -1,26 +1,28 @@
 <?php
- /**
+/**
+ * SuiteCRM is a customer relationship management program developed by SuiteCRM Ltd.
+ * Copyright (C) 2014 - 2025 SuiteCRM Ltd.
  *
+ * This program is free software; you can redistribute it and/or modify it under
+ * the terms of the GNU Affero General Public License version 3 as published by the
+ * Free Software Foundation with the addition of the following permission added
+ * to Section 15 as permitted in Section 7(a): FOR ANY PART OF THE COVERED WORK
+ * IN WHICH THE COPYRIGHT IS OWNED BY SUITECRM, SUITECRM DISCLAIMS THE
+ * WARRANTY OF NON INFRINGEMENT OF THIRD PARTY RIGHTS.
  *
- * @package
- * @copyright SalesAgility Ltd http://www.salesagility.com
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more
+ * details.
  *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU AFFERO GENERAL PUBLIC LICENSE as published by
- * the Free Software Foundation; either version 3 of the License, or
- * (at your option) any later version.
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU AFFERO GENERAL PUBLIC LICENSE
- * along with this program; if not, see http://www.gnu.org/licenses
- * or write to the Free Software Foundation,Inc., 51 Franklin Street,
- * Fifth Floor, Boston, MA 02110-1301  USA
- *
- * @author SalesAgility Ltd <support@salesagility.com>
+ * In accordance with Section 7(b) of the GNU Affero General Public License
+ * version 3, these Appropriate Legal Notices must retain the display of the
+ * "Supercharged by SuiteCRM" logo. If the display of the logos is not reasonably
+ * feasible for technical reasons, the Appropriate Legal Notices must display
+ * the words "Supercharged by SuiteCRM".
  */
 
 
@@ -44,7 +46,7 @@ function getDocumentRevisionPath($revisionId)
 function createPPTXDocument($path)
 {
     $doc = Zend_Search_Lucene_Document_Pptx::loadPptxFile($path);
-    $doc->addField(Zend_Search_Lucene_Field::Text('filename', basename($path)));
+    $doc->addField(Zend_Search_Lucene_Field::Text('filename', basename((string) $path)));
     return $doc;
 }
 
@@ -57,7 +59,7 @@ function createPPTXDocument($path)
 function createXLSXDocument($path)
 {
     $doc = Zend_Search_Lucene_Document_Xlsx::loadXlsxFile($path);
-    $doc->addField(Zend_Search_Lucene_Field::Text('filename', basename($path)));
+    $doc->addField(Zend_Search_Lucene_Field::Text('filename', basename((string) $path)));
     return $doc;
 }
 /**
@@ -69,7 +71,7 @@ function createXLSXDocument($path)
 function createHTMLDocument($path)
 {
     $doc = Zend_Search_Lucene_Document_Html::loadHTMLFile($path);
-    $doc->addField(Zend_Search_Lucene_Field::Text('filename', basename($path)));
+    $doc->addField(Zend_Search_Lucene_Field::Text('filename', basename((string) $path)));
     return $doc;
 }
 
@@ -82,7 +84,7 @@ function createHTMLDocument($path)
 function createDocXDocument($path)
 {
     $doc = Zend_Search_Lucene_Document_Docx::loadDocxFile($path);
-    $doc->addField(Zend_Search_Lucene_Field::Text('filename', basename($path)));
+    $doc->addField(Zend_Search_Lucene_Field::Text('filename', basename((string) $path)));
     return $doc;
 }
 
@@ -108,7 +110,7 @@ function createDocDocument($path)
     $outtext = preg_replace("/[^a-zA-Z0-9\s\,\.\-\n\r\t@\/\_\(\)]/", "", $outtext);
 
     $doc = new Zend_Search_Lucene_Document();
-    $doc->addField(Zend_Search_Lucene_Field::Text('filename', basename($path)));
+    $doc->addField(Zend_Search_Lucene_Field::Text('filename', basename((string) $path)));
     $doc->addField(Zend_Search_Lucene_Field::UnStored('contents', $outtext));
     fclose($fileHandle);
     return $doc;
@@ -125,7 +127,7 @@ function createPDFDocument($path)
     require_once('PdfParser.php');
     $text = PdfParser::parseFile($path);
     $doc = new Zend_Search_Lucene_Document();
-    $doc->addField(Zend_Search_Lucene_Field::Text('filename', basename($path)));
+    $doc->addField(Zend_Search_Lucene_Field::Text('filename', basename((string) $path)));
     $doc->addField(Zend_Search_Lucene_Field::UnStored('contents', $text));
     return $doc;
 }
@@ -155,7 +157,7 @@ function createOdtDocument($path)
     // Close file
     $package->close();
     $doc->addField(Zend_Search_Lucene_Field::UnStored('contents', implode(' ', $documentBody), 'UTF-8'));
-    $doc->addField(Zend_Search_Lucene_Field::Text('filename', basename($path)));
+    $doc->addField(Zend_Search_Lucene_Field::Text('filename', basename((string) $path)));
     return $doc;
 }
 
@@ -168,7 +170,7 @@ function createOdtDocument($path)
 function createTextDocument($path)
 {
     $doc = new Zend_Search_Lucene_Document();
-    $doc->addField(Zend_Search_Lucene_Field::Text('filename', basename($path)));
+    $doc->addField(Zend_Search_Lucene_Field::Text('filename', basename((string) $path)));
     $doc->addField(Zend_Search_Lucene_Field::UnStored('contents', file_get_contents($path)));
     return $doc;
 }
@@ -183,7 +185,7 @@ function createTextDocument($path)
 function createRTFDocument($path)
 {
     $doc = new Zend_Search_Lucene_Document();
-    $doc->addField(Zend_Search_Lucene_Field::Text('filename', basename($path)));
+    $doc->addField(Zend_Search_Lucene_Field::Text('filename', basename((string) $path)));
     $contents = rtf2text($path);
     //print_r($contents);
     $doc->addField(Zend_Search_Lucene_Field::UnStored('contents', $contents));
@@ -198,7 +200,8 @@ function createRTFDocument($path)
 function rtf_isPlainText($s)
 {
     $arrfailAt = array("*", "fonttbl", "colortbl", "datastore", "themedata");
-    for ($i = 0; $i < count($arrfailAt); $i++) {
+    $arrfailAtCount = count($arrfailAt);
+    for ($i = 0; $i < $arrfailAtCount; $i++) {
         if (!empty($s[$arrfailAt[$i]])) {
             return false;
         }
@@ -301,7 +304,7 @@ function rtf2text($filename)
                         // We need to check whether the stack contains \ucN control word. If it does,
                         // we should remove the N characters from the output stream.
                         case "u":
-                            $toText .= html_entity_decode("&#x".dechex($param).";");
+                            $toText .= html_entity_decode("&#x".dechex((int) $param).";");
                             $ucDelta = @$stack[$j]["uc"];
                             if ($ucDelta > 0) {
                                 $i += $ucDelta;

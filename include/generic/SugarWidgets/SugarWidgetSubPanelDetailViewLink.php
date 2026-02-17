@@ -46,6 +46,7 @@ if (!defined('sugarEntry') || !sugarEntry) {
 
 
 
+#[\AllowDynamicProperties]
 class SugarWidgetSubPanelDetailViewLink extends SugarWidgetField
 {
     public function displayList(&$layout_def)
@@ -114,16 +115,21 @@ class SugarWidgetSubPanelDetailViewLink extends SugarWidgetField
         $action = 'DetailView';
         if($module === "Emails"){
             $email = BeanFactory::getBean($module, $record);
-            if($email->status === "draft"){
+            if($email !== false && $email->status === "draft"){
                 $action = 'DetailDraftView';
             }
         }
         $value = $layout_def['fields'][$key];
         global $current_user;
+
+        $detailView = $layout_def['DetailView'] ?? '';
+        $ownerId = $layout_def['owner_id'] ?? '';
+        $ownerModule = $layout_def['owner_module'] ?? '';
+        $groupAccessView = SecurityGroup::groupHasAccess($module,$record,'view');
         if (!empty($record) &&
-            ($layout_def['DetailView'] && !$layout_def['owner_module']
-            ||  $layout_def['DetailView'] && !ACLController::moduleSupportsACL($layout_def['owner_module'])
-            || ACLController::checkAccess($layout_def['owner_module'], 'view', $layout_def['owner_id'] == $current_user->id))) {
+            ($detailView && !$layout_def['owner_module']
+            || $detailView && !ACLController::moduleSupportsACL($layout_def['owner_module'])
+            || ACLController::checkAccess($ownerModule, 'view', $ownerId == $current_user->id, 'module',  $groupAccessView))) {
             $link = ajaxLink("index.php?module=$module&action=$action&record={$record}{$parent}");
             if ($module == 'EAPM') {
                 $link = "index.php?module=$module&action=$action&record={$record}{$parent}";

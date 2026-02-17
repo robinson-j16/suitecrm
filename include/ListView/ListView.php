@@ -46,6 +46,7 @@ require_once('include/EditView/SugarVCR.php');
  * ListView - list of many objects
  * @api
  */
+#[\AllowDynamicProperties]
 class ListView
 {
     public $local_theme= null;
@@ -71,7 +72,7 @@ class ListView
     public $show_mass_update_form = true;
     public $query_where_has_changed = false;
     public $display_header_and_footer = true;
-    public $baseURL = '';
+    public $base_URL = '';
     public $is_dynamic = false;
     public $inline = false;
     public $start_link_wrapper = '';
@@ -91,6 +92,8 @@ class ListView
     public $force_mass_update=false;
     public $keep_mass_update_form_open=false;
     public $ignorePopulateOnly = false;
+    public $appendToBaseUrl = [];
+    public $sortby = [];
 
     public function setDataArray($value)
     {
@@ -972,7 +975,7 @@ class ListView
 
         foreach ($priority_map as $p) {
             if (array_key_exists($p, $sortOrderList)) {
-                $order = strtolower($sortOrderList[$p]);
+                $order = strtolower($sortOrderList[$p] ?? '');
                 if (in_array($order, array('asc', 'desc'))) {
                     return $order;
                 }
@@ -1132,8 +1135,9 @@ class ListView
         $_SESSION['last_sub' .$this->subpanel_module. '_url'] = $this->getBaseURL($html_var);
 
         // Bug 8139 - Correct Subpanel sorting on 'name', when subpanel sorting default is 'last_name, first_name'
+        $sortBy = $subpanel_def->_instance_properties['sort_by'] ?? '';
         if (($this->sortby == 'name' || $this->sortby == 'last_name') &&
-            str_replace(' ', '', trim($subpanel_def->_instance_properties['sort_by'])) == 'last_name,first_name') {
+            str_replace(' ', '', trim($sortBy)) == 'last_name,first_name') {
             $this->sortby = 'last_name '.$this->sort_order.', first_name ';
         }
         try {
@@ -1160,7 +1164,7 @@ class ListView
             return ['list' => [], 'parent_data' => [], 'query' => ''];
         }
         $list = $response['list'];
-        
+
         if (!$countOnly) {
             $row_count = $response['row_count'];
             $next_offset = $response['next_offset'];
@@ -1172,7 +1176,7 @@ class ListView
             $list_view_row_count = $row_count;
             $this->processListNavigation('dyn_list_view', $html_var, $current_offset, $next_offset, $previous_offset, $row_count, $sugarbean, $subpanel_def);
         }
-        
+
         return $response;
     }
 
@@ -1196,8 +1200,8 @@ class ListView
         /*fixes an issue with deletes when doing a search*/
         foreach (array_merge($_GET, $_POST) as $name=>$value) {
             //echo ("$name = $value <br/>");
-                if (!empty($value) && $name != 'sort_order' //&& $name != ListView::getSessionVariableName($html_varName,"ORDER_BY")
-                        && $name != ListView::getSessionVariableName($html_varName, "offset")
+                if (!empty($value) && $name != 'sort_order' //&& $name != $this->getSessionVariableName($html_varName,"ORDER_BY")
+                        && $name != $this->getSessionVariableName($html_varName, "offset")
                         /*&& substr_count($name, "ORDER_BY")==0*/ && !in_array($name, $blockVariables)) {
                     if (is_array($value)) {
                         foreach ($value as $valuename=>$valuevalue) {
@@ -1235,7 +1239,7 @@ class ListView
             }
         }
 
-        $baseurl .= "&".ListView::getSessionVariableName($html_varName, "offset")."=";
+        $baseurl .= "&".$this->getSessionVariableName($html_varName, "offset")."=";
         $cache[$html_varName] = $baseurl;
         return $baseurl;
     }
@@ -1585,7 +1589,7 @@ class ListView
                 if ($this->base_URL == "/index.php") {
                     $this->base_URL .= "?";
                 } else {
-                    if ($fullRequestString == substr($this->baseURL, '-' . strlen($fullRequestString))) {
+                    if ($fullRequestString == substr($this->base_URL, '-' . strlen($fullRequestString))) {
                         $this->base_URL = preg_replace("/&" . $key . "\=.*/", "", $this->base_URL);
                     } else {
                         $this->base_URL = preg_replace("/&" . $key . "\=.*?&/", "&", $this->base_URL);

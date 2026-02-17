@@ -40,6 +40,7 @@
 
 require_once('modules/AOS_Products_Quotes/AOS_Products_Quotes_sugar.php');
 
+#[\AllowDynamicProperties]
 class AOS_Products_Quotes extends AOS_Products_Quotes_sugar
 {
     public function __construct()
@@ -56,7 +57,9 @@ class AOS_Products_Quotes extends AOS_Products_Quotes_sugar
         $j = 0;
         for ($i = 0; $i < $line_count; ++$i) {
             if (isset($post_data[$key . 'deleted'][$i]) && $post_data[$key . 'deleted'][$i] == 1) {
-                $this->mark_deleted($post_data[$key . 'id'][$i]);
+                if (isset($post_data[$key . 'id'][$i])){
+                    $this->mark_deleted($post_data[$key . 'id'][$i]);
+                }
             } else {
                 if (!isset($post_data[$key . 'id'][$i])) {
                     LoggerManager::getLogger()->warn('Post date has no key id');

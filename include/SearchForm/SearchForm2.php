@@ -47,7 +47,7 @@ require_once('include/ListView/ListViewSmarty.php');
 require_once('include/TemplateHandler/TemplateHandler.php');
 require_once('include/EditView/EditView2.php');
 
-
+#[\AllowDynamicProperties]
 class SearchForm
 {
     public $seed = null;
@@ -186,7 +186,7 @@ class SearchForm
         $this->th->ss->assign('action', $this->action);
         $this->th->ss->assign('displayView', $this->displayView);
         $this->th->ss->assign('viewTab', $this->getViewTab());
-
+        $this->th->ss->assign('user_options', get_user_array(false));
 
         require_once('modules/MySettings/StoreQuery.php');
         $storeQuery = new StoreQuery();
@@ -630,7 +630,7 @@ class SearchForm
                     if (isset($data['enabled']) && $data['enabled'] == false) {
                         continue;
                     }
-                    $data['name'] = $data['name'] . '_' . $this->parsedView;
+                    $data['name'] = ($data['name'] ?? '') . '_' . $this->parsedView;
                     $this->formData[] = array('field' => $data);
                     $this->fieldDefs[$data['name']] = $data;
                 } else {
@@ -951,7 +951,7 @@ class SearchForm
 
                         $this->searchFields[$real_field]['value'] = $this->searchFields[$field]['value'];
                         $this->searchFields[$real_field]['operator'] = $this->searchFields[$field]['operator'];
-                        $params['value'] = $this->searchFields[$field]['value'];
+                        $params['value'] = $db->quote($this->searchFields[$field]['value']);
                         $params['operator'] = $this->searchFields[$field]['operator'];
                         unset($this->searchFields[$field]['value']);
                         $field = $real_field;
@@ -1049,7 +1049,7 @@ class SearchForm
                         }
                     }
                 } else {
-                    $field_value = $parms['value'];
+                    $field_value = $db->quote($parms['value']);
                 }
 
                 //set db_fields array.
@@ -1326,13 +1326,13 @@ class SearchForm
                                         // If db_fields (e.g. contacts.first_name) contain table name, need to remove it
                                         for ($i = 0; $i < count($concat_fields); $i++) {
                                             if (strpos($concat_fields[$i], $concat_table) !== false) {
-                                                $concat_fields[$i] = substr($concat_fields[$i], strlen($concat_table) + 1);
+                                                $concat_fields[$i] = substr($concat_fields[$i], strlen($concat_table ?? '') + 1);
                                             }
                                         }
 
                                         // Concat the fields and search for the value
-                                        $where .= $this->seed->db->concat($concat_table, $concat_fields) . " LIKE " . $this->seed->db->quoted($field_value . $like_char);
-                                        $where .= ' OR ' . $this->seed->db->concat($concat_table, array_reverse($concat_fields)) . " LIKE " . $this->seed->db->quoted($field_value . $like_char);
+                                        $where .= $this->seed->db->concat($concat_table, $concat_fields) . " LIKE " . $this->seed->db->quoted(sql_like_string($field_value, $like_char));
+                                        $where .= ' OR ' . $this->seed->db->concat($concat_table, array_reverse($concat_fields)) . " LIKE " . $this->seed->db->quoted(sql_like_string($field_value, $like_char));
                                     } else {
                                         //Check if this is a first_name, last_name search
                                         if (isset($this->seed->field_name_map) && isset($this->seed->field_name_map[$db_field])) {
@@ -1341,7 +1341,7 @@ class SearchForm
                                                 if (!empty($GLOBALS['app_list_strings']['salutation_dom']) && is_array($GLOBALS['app_list_strings']['salutation_dom'])) {
                                                     foreach ($GLOBALS['app_list_strings']['salutation_dom'] as $salutation) {
                                                         if (!empty($salutation) && strpos($field_value, $salutation) === 0) {
-                                                            $field_value = trim(substr($field_value, strlen($salutation)));
+                                                            $field_value = trim(substr(($field_value ?? ''), strlen($salutation)));
                                                             break;
                                                         }
                                                     }

@@ -45,6 +45,7 @@ if (!defined('sugarEntry') || !sugarEntry) {
  * Old EditView
  * @deprecated
  */
+#[\AllowDynamicProperties]
 class EditView
 {
     /**
@@ -68,7 +69,7 @@ class EditView
      * @param string $module module to use
      * @param string $template template of the form to retreive
      */
-    public function __construct($module, $template)
+    public function __construct($module = null, $template = null)
     {
         $this->module = $module;
         $this->template = $template;
